@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatório Executivo de Produção</title>
+<style>
+@page{size:A4;margin:10mm}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;color:#26332c;font-size:10px}.header{border-bottom:4px solid #0b6b3a;padding:6px 0 12px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:20px;font-weight:800;color:#0b6b3a}.title{text-align:right}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.card{border:1px solid #dce5df;border-radius:8px;padding:11px 6px;text-align:center;background:#f8fbf9}.num{font-size:18px;font-weight:800;color:#0b6b3a}.box{border:1px solid #dce5df;border-radius:8px;padding:12px;margin-top:12px}.bar-bg{height:12px;background:#eaf0ec;border-radius:6px;overflow:hidden}.bar{height:100%;background:#0b6b3a}.page-break{page-break-before:always}table{width:100%;border-collapse:collapse;font-size:8px}th{background:#0b6b3a;color:white;padding:7px 5px;text-align:left}td{padding:6px 5px;border-bottom:1px solid #e4e9e6}.footer{margin-top:12px;border-top:1px solid #ddd;padding-top:7px;text-align:center;color:#859188;font-size:7px}
+</style>
+</head>
+<body>
+<div class="header"><div class="brand">EXAMPLE PHARMA</div><div class="title"><h1>RELATÓRIO EXECUTIVO DE PRODUÇÃO</h1><div>{{ $json.competencia.mesEncontrado }}/{{ $json.competencia.anoEncontrado }}</div></div></div>
+<div class="cards">
+<div class="card"><div class="num">{{ $json.indicadores.totalProduzidoFmt }}</div><div>Produção total</div></div>
+<div class="card"><div class="num">{{ $json.indicadores.totalOrdens }}</div><div>Ordens</div></div>
+<div class="card"><div class="num">{{ $json.indicadores.totalProdutos }}</div><div>Produtos</div></div>
+<div class="card"><div class="num">{{ $json.indicadores.mediaPorOrdemFmt }}</div><div>Média por ordem</div></div>
+</div>
+<div class="box"><h2>Top produtos</h2>{{ $json.graficoBarra.map(p => `<div style="margin:7px 0"><div>${p.produto} — ${p.quantidadeFmt}</div><div class="bar-bg"><div class="bar" style="width:${Math.max((p.quantidade/$json.graficoBarra[0].quantidade)*100,2)}%"></div></div></div>`).join('') }}</div>
+<div class="box"><h2>Resumo executivo</h2><p>{{ $json.resumoExecutivo }}</p></div>
+<div class="page-break"></div>
+<h2>Consolidado de produção</h2>
+<table><thead><tr><th>Código</th><th>Produto</th><th>Ordens</th><th>Quantidade</th><th>%</th></tr></thead><tbody>{{ $json.rankingProdutos.map(p => `<tr><td>${p.codigoProduto}</td><td>${p.produto}</td><td>${p.ordens}</td><td>${p.quantidadeFmt}</td><td>${p.percentualFmt}</td></tr>`).join('') }}</tbody></table>
+<div class="footer">Public portfolio template — synthetic/anonymized data only.</div>
+</body>
+</html>

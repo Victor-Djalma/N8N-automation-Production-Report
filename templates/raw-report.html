@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatório Bruto de Produção</title>
+<style>
+  body{font-family:Arial,sans-serif;color:#222;margin:0;background:#fff}
+  .page{padding:32px 45px 70px}
+  .header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #08783e;padding-bottom:14px}
+  .brand{font-size:24px;font-weight:700;color:#08783e}.meta{text-align:right;color:#555}
+  .title{text-align:center;color:#08783e;margin:24px 0}
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .card{border:1px solid #ddd;border-top:4px solid #08783e;padding:14px;background:#fafafa}
+  table{width:100%;border-collapse:collapse;margin-top:16px;font-size:10px} th{background:#08783e;color:white;padding:7px} td{border:1px solid #ddd;padding:6px}
+  .footer{margin-top:30px;border-top:1px solid #ddd;padding-top:8px;text-align:center;color:#777;font-size:9px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="brand">EXAMPLE PHARMA</div>
+    <div class="meta">Relatório de Produção<br>{{ $json.competencia.mesEncontrado }}/{{ $json.competencia.anoEncontrado }}</div>
+  </div>
+  <h1 class="title">RELATÓRIO MENSAL DE PRODUÇÃO</h1>
+  <div class="cards">
+    <div class="card"><b>Produção Total</b><br>{{ Number($json.resumo.quantidadeTotalProduzida).toLocaleString('pt-BR') }}</div>
+    <div class="card"><b>Ordens</b><br>{{ $json.resumo.quantidadeOrdens }}</div>
+    <div class="card"><b>Produtos</b><br>{{ $json.resumo.produtosIndustrializados }}</div>
+    <div class="card"><b>Valor Produzido</b><br>R$ {{ Number($json.resumo.valorTotalProduzido).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) }}</div>
+  </div>
+  <table>
+    <thead><tr><th>Documento</th><th>Data</th><th>Cód.</th><th>Produto</th><th>Qtd.</th><th>UN</th><th>Valor Total</th><th>Materiais</th></tr></thead>
+    <tbody>
+    {{ $json.ordens.map(o => `<tr><td>${o.documento}</td><td>${o.dataEntrada}</td><td>${o.codigoProduto}</td><td>${o.produto}</td><td>${Number(o.quantidadeProduzida).toLocaleString('pt-BR')}</td><td>${o.unidade}</td><td>R$ ${Number(o.valorTotal).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td>${o.quantidadeMateriais}</td></tr>`).join('') }}
+    </tbody>
+  </table>
+  <div class="footer">Public portfolio template — synthetic/anonymized data only.</div>
+</div>
+</body>
+</html>

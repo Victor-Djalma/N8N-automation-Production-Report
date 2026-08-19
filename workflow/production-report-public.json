@@ -1,0 +1,107 @@
+{
+  "name": "Production Report Automation - Public Template",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "form-trigger",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [-900, 0]
+    },
+    {
+      "parameters": {"operation": "xls", "binaryPropertyName": "RELATORIO_SYSTEM"},
+      "id": "extract-xls",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [-680, -120]
+    },
+    {
+      "parameters": {"jsCode": "// See src/parser-system.js"},
+      "id": "parser",
+      "name": "PARSER SYSTEM",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-450, 0]
+    },
+    {
+      "parameters": {"jsCode": "// See src/validate-report.js"},
+      "id": "validator",
+      "name": "VALIDAR RELATÓRIO",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-230, -120]
+    },
+    {
+      "parameters": {"rules": {"values": []}},
+      "id": "validation-router",
+      "name": "VALIDAÇÃO DO RELATÓRIO",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {"rules": {"values": []}},
+      "id": "report-router",
+      "name": "RELATÓRIO DESEJADO",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [250, 0]
+    },
+    {
+      "parameters": {"jsCode": "// See src/prepare-executive-data.js"},
+      "id": "executive-data",
+      "name": "PREPARAR DADOS EXECUTIVOS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 100]
+    },
+    {
+      "parameters": {"html": "<!-- See templates/raw-report.html -->"},
+      "id": "raw-html",
+      "name": "MONTAGEM RELATÓRIO HTML - DADOS BRUTOS",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [500, -180]
+    },
+    {
+      "parameters": {"html": "<!-- See templates/executive-report.html -->"},
+      "id": "executive-html",
+      "name": "RELATÓRIO HTML EXECUTIVO",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [740, 100]
+    },
+    {
+      "parameters": {"method": "POST", "url": "http://gotenberg:3000/forms/chromium/convert/html"},
+      "id": "raw-pdf",
+      "name": "GERAR PDF c/ Gotenberg - BRUTO",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [980, -180]
+    },
+    {
+      "parameters": {"method": "POST", "url": "http://gotenberg:3000/forms/chromium/convert/html"},
+      "id": "executive-pdf",
+      "name": "GERAR PDF c/ Gotenberg - EXECUTIVO",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [980, 100]
+    }
+  ],
+  "connections": {
+    "On form submission": {"main": [[{"node": "Extract from File", "type": "main", "index": 0}]]},
+    "Extract from File": {"main": [[{"node": "PARSER SYSTEM", "type": "main", "index": 0}]]},
+    "PARSER SYSTEM": {"main": [[{"node": "VALIDAR RELATÓRIO", "type": "main", "index": 0}]]},
+    "VALIDAR RELATÓRIO": {"main": [[{"node": "VALIDAÇÃO DO RELATÓRIO", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "publicVersion": true,
+    "privacyNote": "Company data, private IPs, production values and credentials were removed. Configure the Switch rules and copy the source files into the corresponding Code/HTML nodes before use."
+  },
+  "active": false,
+  "versionId": "public-template"
+}
