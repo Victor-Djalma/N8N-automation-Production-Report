@@ -7,8 +7,7 @@ O objetivo do projeto é transformar relatórios brutos exportados por um ERP em
 > **Privacidade:** esta versão pública utiliza dados sintéticos e identificadores anonimizados. Informações de empresa, endereços de rede, produtos, documentos, volumes, credenciais e demais dados internos foram removidos ou substituídos.
 
 ## Arquitetura
-
-![Arquitetura do workflow](docs/architecture-public.webp)
+![Arquitetura do workflow](docs/architecture-public.png)
 
 ### Fluxo
 
