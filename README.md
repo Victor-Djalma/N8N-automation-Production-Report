@@ -1,105 +1,180 @@
-# N8N Automation — Production Report
+# ERP Report Automation Hub with n8n
 
-Automação de relatórios de produção desenvolvida com **n8n**, **JavaScript**, **HTML/CSS**, **Docker** e **Gotenberg**.
+A real-world workflow automation project for transforming ERP exports into validated, structured reports.
 
-O objetivo do projeto é transformar relatórios brutos exportados por um ERP em relatórios estruturados, validados e prontos para análise em PDF.
+This project started as a production-report automation and evolved into a modular **Report Automation Hub** with three independent modules:
 
-> **Privacidade:** esta versão pública utiliza dados sintéticos e identificadores anonimizados. Informações de empresa, endereços de rede, produtos, documentos, volumes, credenciais e demais dados internos foram removidos ou substituídos.
+- **Production**
+- **Sales**
+- **Purchases**
 
-## Arquitetura
-![Arquitetura do workflow](docs/architecture-public.png)
+The workflow was built with **n8n**, **JavaScript**, **HTML/CSS/SVG**, **Docker**, **Gotenberg**, **XLS/XLSX**, and **JSON**.
 
-### Fluxo
+> **Privacy:** this public version is sanitized. Company names, addresses, contact information, internal IP addresses, instance identifiers, credentials, real products, customers, suppliers, and operational values are not included.
 
-```text
-Formulário
-   ↓
-Extração do XLS
-   ↓
-Parser JavaScript
-   ↓
-Validação
-   ├── ERRO → LOG TXT → interrupção
-   └── OK/ALERTA
-          ↓
-     Tipo de relatório
-       ├── BRUTO → HTML → index.html → Gotenberg → PDF
-       └── EXECUTIVO → consolidação → HTML/gráficos → index.html → Gotenberg → PDF
-```
+## Problem
 
-## Principais recursos
+ERP exports are useful, but they are not always ready for analysis or presentation. The original process required manually reviewing XLS files, organizing repeated records, checking totals, and creating readable reports.
 
-- Upload de relatório `.xls` pelo formulário do n8n
-- Parsing de registros de produção e materiais
-- Validação de competência, quantidade e valor
-- Detecção de documentos ausentes na sequência
-- Geração de log de erro em UTF-8
-- Relatório técnico/bruto com ordens detalhadas
-- Relatório executivo com indicadores, ranking e gráficos
-- Conversão HTML → PDF através do Gotenberg em Docker
-- Roteamento por regras para `BRUTO`, `EXECUTIVO` ou `AMBOS`
-
-## Estrutura do repositório
+The goal was to reduce the user flow to:
 
 ```text
-.
-├── src/
-│   ├── parser-system.js
-│   ├── validate-report.js
-│   └── prepare-executive-data.js
-├── templates/
-│   ├── raw-report.html
-│   └── executive-report.html
-├── workflow/
-│   └── production-report-public.json
-├── docs/
-│   ├── ARCHITECTURE.md
-│   └── architecture-public.webp
-├── .gitignore
-├── LICENSE
-└── README.md
+Upload → Validate → Process → Generate → Download
 ```
 
-## Tecnologias
+## Architecture
 
-- n8n
-- JavaScript
-- HTML5 / CSS3
-- Docker
-- Gotenberg
-- XLS / JSON
+```text
+Form
+  ↓
+XLS Extraction
+  ↓
+Report Type Switch
+  ├── Production Parser
+  ├── Sales Parser
+  └── Purchases Parser
+         ↓
+    Validation Layer
+      ├── OK
+      ├── ALERT
+      └── ERROR → Error Log
+         ↓
+     Output Switch
+      ├── RAW
+      ├── EXECUTIVE
+      └── BOTH
+         ↓
+   PDF / XLSX / ZIP
+```
 
-## Gotenberg
+Each report type has its own JavaScript parser. This avoids a monolithic parser and keeps report-specific rules isolated.
 
-Exemplo local para laboratório:
+## Validation model
+
+The parsers follow the same general contract:
+
+```json
+{
+  "parserOk": true,
+  "status": "OK",
+  "module": "PRODUCTION",
+  "validation": {
+    "alerts": [],
+    "errors": []
+  }
+}
+```
+
+- **OK** — continue normally.
+- **ALERT** — continue, but expose the detected inconsistency.
+- **ERROR** — stop normal generation and create an error log.
+
+Checks include report compatibility, selected period, missing valid records, and differences between calculated values and ERP totals.
+
+## RAW and Executive outputs
+
+The **RAW** report preserves operational detail while reorganizing repetitive ERP records into a more readable structure.
+
+The **Executive** report focuses on KPIs, rankings, summaries, and charts. Depending on the module, it can include production totals, sales indicators, customer counts, average ticket, supplier concentration, and other metrics.
+
+Charts are generated directly with HTML/CSS/SVG, avoiding an external chart library during PDF generation.
+
+## PDF generation
+
+HTML is converted to PDF using **Gotenberg** running in Docker:
+
+```text
+JavaScript
+    ↓
+   HTML
+    ↓
+Gotenberg
+    ↓
+   PDF
+```
+
+The public workflow uses:
+
+```text
+http://gotenberg:3000/forms/chromium/convert/html
+```
+
+Example:
 
 ```bash
 docker run -d \
   --name gotenberg \
   --restart unless-stopped \
   -p 3000:3000 \
-  -e API_TIMEOUT=120s \
-  -e CHROMIUM_START_TIMEOUT=60s \
-  -e CHROMIUM_AUTO_START=true \
   gotenberg/gotenberg:8
 ```
 
-No workflow público, use uma variável de ambiente ou endpoint local configurável, por exemplo:
+## PDF + XLSX
+
+The RAW path can generate both PDF and XLSX and deliver them together:
 
 ```text
-http://gotenberg:3000/forms/chromium/convert/html
+Report_RAW_Production_September_2026.zip
+├── Report_RAW_Production_September_2026.pdf
+└── Report_RAW_Production_September_2026.xlsx
 ```
 
-Nunca publique IPs internos, tokens ou credenciais dentro do JSON do workflow.
+The files are generated independently, merged, and compressed into one ZIP. This keeps the form simpler for the end user.
 
-## Pipeline em JavaScript
+## Repository structure
 
-Os códigos da pasta `src/` representam a lógica central utilizada nos nodes Code do n8n:
+```text
+.
+├── workflow/
+│   └── report-automation-hub-public.json
+├── src/
+│   ├── parser-production.js
+│   ├── parser-sales.js
+│   ├── parser-purchases.js
+│   ├── generate-raw-report.js
+│   ├── generate-executive-report.js
+│   └── error-log.js
+├── docs/
+│   └── ARCHITECTURE.md
+├── LICENSE
+└── README.md
+```
 
-1. `parser-system.js` — transforma linhas do XLS em ordens estruturadas.
-2. `validate-report.js` — valida competência, totais e sequência documental.
-3. `prepare-executive-data.js` — consolida produtos, KPIs, ranking e dados de gráficos.
+## Importing the workflow
 
-## Licença
+The file in `workflow/report-automation-hub-public.json` is a sanitized n8n export.
 
-MIT License — consulte [LICENSE](LICENSE).
+After importing it, review your environment before running it:
+
+1. Configure the Gotenberg endpoint for your Docker/network environment.
+2. Confirm the XLS layout exported by your ERP.
+3. Adapt parser rules to your own report format.
+4. Keep credentials and infrastructure-specific values outside public workflow exports.
+
+This repository is an automation and architecture case study, not a universal ERP parser.
+
+## Project evolution
+
+The first version of this solution was built with **Google Apps Script**. It worked for the initial use case, but the project later needed more routing, multiple report types, validation, error handling, PDF generation, and different output formats.
+
+Moving to n8n made the orchestration visual and modular while still allowing JavaScript where code was the better fit.
+
+## Cloud and DevOps connection
+
+**AWS was not used directly in this implementation.**
+
+However, the project applies concepts that transfer well to Cloud and DevOps environments:
+
+- workflow orchestration
+- event-driven processing
+- modular processing stages
+- input/output contracts
+- validation gates
+- structured error handling
+- containerized dependencies
+- separation between data processing and presentation
+- future observability and monitoring
+
+## License
+
+MIT License — see [LICENSE](LICENSE).
