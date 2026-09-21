@@ -1,87 +1,106 @@
-# ERP Report Automation Hub with n8n
+# Central de Automação de Relatórios ERP com n8n
 
-A real-world workflow automation project for transforming ERP exports into validated, structured reports.
+Projeto real de automação criado para transformar relatórios exportados de um ERP em arquivos estruturados, validados e prontos para análise.
 
-This project started as a production-report automation and evolved into a modular **Report Automation Hub** with three independent modules:
+A solução começou como uma automação focada em relatórios de produção e evoluiu para uma **Central de Relatórios modular**, atualmente com três módulos independentes:
 
-- **Production**
-- **Sales**
-- **Purchases**
+- **Produção**
+- **Vendas**
+- **Compras**
 
-The workflow was built with **n8n**, **JavaScript**, **HTML/CSS/SVG**, **Docker**, **Gotenberg**, **XLS/XLSX**, and **JSON**.
+O fluxo foi desenvolvido com **n8n**, **JavaScript**, **HTML/CSS/SVG**, **Docker**, **Gotenberg**, **XLS/XLSX** e **JSON**.
 
-> **Privacy:** this public version is sanitized. Company names, addresses, contact information, internal IP addresses, instance identifiers, credentials, real products, customers, suppliers, and operational values are not included.
+> **Privacidade:** esta versão pública foi sanitizada. Nomes de empresa, endereços, contatos, IPs internos, identificadores de instância, credenciais, produtos, clientes, fornecedores e valores operacionais reais não estão incluídos.
 
-## Problem
+## Problema
 
-ERP exports are useful, but they are not always ready for analysis or presentation. The original process required manually reviewing XLS files, organizing repeated records, checking totals, and creating readable reports.
+Os relatórios exportados pelo ERP continham informações importantes, mas exigiam trabalho manual para organizar os dados, validar totais, identificar inconsistências e gerar arquivos mais fáceis de utilizar.
 
-The goal was to reduce the user flow to:
+O objetivo foi reduzir a experiência do usuário para algo próximo de:
 
 ```text
-Upload → Validate → Process → Generate → Download
+Upload → Validação → Processamento → Geração → Download
 ```
 
-## Architecture
+## Visão do workflow
+
+(IMAGEM)
+
+## Arquitetura
 
 ```text
-Form
+Formulário
   ↓
-XLS Extraction
+Extração do XLS
   ↓
-Report Type Switch
-  ├── Production Parser
-  ├── Sales Parser
-  └── Purchases Parser
+Switch de Tipo de Relatório
+  ├── Parser de Produção
+  ├── Parser de Vendas
+  └── Parser de Compras
          ↓
-    Validation Layer
+    Camada de Validação
       ├── OK
-      ├── ALERT
-      └── ERROR → Error Log
+      ├── ALERTA
+      └── ERRO → Log de Erro
          ↓
-     Output Switch
-      ├── RAW
-      ├── EXECUTIVE
-      └── BOTH
+     Switch de Saída
+      ├── BRUTO
+      ├── EXECUTIVO
+      └── AMBOS
          ↓
    PDF / XLSX / ZIP
 ```
 
-Each report type has its own JavaScript parser. This avoids a monolithic parser and keeps report-specific rules isolated.
+Cada módulo possui seu próprio parser em JavaScript. Essa separação evita concentrar toda a lógica em um único parser e facilita manutenção, testes e inclusão de novos módulos no futuro.
 
-## Validation model
+## Modelo de validação
 
-The parsers follow the same general contract:
+Os parsers seguem um padrão comum de resposta:
 
 ```json
 {
   "parserOk": true,
   "status": "OK",
-  "module": "PRODUCTION",
-  "validation": {
-    "alerts": [],
-    "errors": []
+  "modulo": "PRODUCAO",
+  "validacao": {
+    "alertas": [],
+    "erros": []
   }
 }
 ```
 
-- **OK** — continue normally.
-- **ALERT** — continue, but expose the detected inconsistency.
-- **ERROR** — stop normal generation and create an error log.
+Existem três estados principais:
 
-Checks include report compatibility, selected period, missing valid records, and differences between calculated values and ERP totals.
+- **OK** — processamento normal.
+- **ALERTA** — o relatório continua sendo gerado, mas uma inconsistência é informada.
+- **ERRO** — o processamento normal é interrompido e um arquivo de log é criado.
 
-## RAW and Executive outputs
+As validações podem verificar compatibilidade do relatório, competência selecionada, ausência de registros válidos e diferenças entre os totais calculados pelo parser e os totais informados pelo ERP.
 
-The **RAW** report preserves operational detail while reorganizing repetitive ERP records into a more readable structure.
+## Relatórios Bruto e Executivo
 
-The **Executive** report focuses on KPIs, rankings, summaries, and charts. Depending on the module, it can include production totals, sales indicators, customer counts, average ticket, supplier concentration, and other metrics.
+O relatório **Bruto** preserva o detalhamento operacional, mas reorganiza registros repetidos em uma estrutura mais legível.
 
-Charts are generated directly with HTML/CSS/SVG, avoiding an external chart library during PDF generation.
+O relatório **Executivo** é voltado para indicadores, rankings, resumos e gráficos. Dependendo do módulo, pode apresentar informações como:
 
-## PDF generation
+- total produzido;
+- ordens de produção;
+- dias ativos;
+- produtos mais e menos produzidos;
+- faturamento;
+- unidades vendidas;
+- quantidade de clientes;
+- ticket médio;
+- total de compras;
+- fornecedores;
+- concentração por fornecedor;
+- rankings e KPIs.
 
-HTML is converted to PDF using **Gotenberg** running in Docker:
+Os gráficos são gerados diretamente com **HTML/CSS/SVG**, evitando dependências externas durante a geração do PDF.
+
+## Geração de PDF
+
+O HTML gerado pela automação é enviado para o **Gotenberg**, executado em Docker:
 
 ```text
 JavaScript
@@ -93,13 +112,13 @@ Gotenberg
    PDF
 ```
 
-The public workflow uses:
+Na versão pública, o endpoint utilizado como referência é:
 
 ```text
 http://gotenberg:3000/forms/chromium/convert/html
 ```
 
-Example:
+Exemplo de execução local:
 
 ```bash
 docker run -d \
@@ -111,17 +130,22 @@ docker run -d \
 
 ## PDF + XLSX
 
-The RAW path can generate both PDF and XLSX and deliver them together:
+No fluxo do relatório Bruto, a automação pode gerar simultaneamente:
+
+- **PDF**, para visualização;
+- **XLSX**, para análise e manipulação dos dados.
+
+Os dois arquivos são reunidos e compactados em um único ZIP:
 
 ```text
-Report_RAW_Production_September_2026.zip
-├── Report_RAW_Production_September_2026.pdf
-└── Report_RAW_Production_September_2026.xlsx
+Relatorio_BRUTO_Producao_Setembro_2026.zip
+├── Relatorio_BRUTO_Producao_Setembro_2026.pdf
+└── Relatorio_BRUTO_Producao_Setembro_2026.xlsx
 ```
 
-The files are generated independently, merged, and compressed into one ZIP. This keeps the form simpler for the end user.
+Isso evita adicionar opções desnecessárias ao formulário e mantém a experiência do usuário simples.
 
-## Repository structure
+## Estrutura do repositório
 
 ```text
 .
@@ -140,41 +164,56 @@ The files are generated independently, merged, and compressed into one ZIP. This
 └── README.md
 ```
 
-## Importing the workflow
+## Importando o workflow
 
-The file in `workflow/report-automation-hub-public.json` is a sanitized n8n export.
+O arquivo `workflow/report-automation-hub-public.json` contém uma versão sanitizada do workflow do n8n.
 
-After importing it, review your environment before running it:
+Depois de importar, é necessário adaptar o ambiente:
 
-1. Configure the Gotenberg endpoint for your Docker/network environment.
-2. Confirm the XLS layout exported by your ERP.
-3. Adapt parser rules to your own report format.
-4. Keep credentials and infrastructure-specific values outside public workflow exports.
+1. configurar o endpoint do Gotenberg;
+2. confirmar o formato do XLS exportado pelo ERP;
+3. adaptar as regras dos parsers ao formato dos relatórios utilizados;
+4. manter credenciais, IPs e informações internas fora de versões públicas.
 
-This repository is an automation and architecture case study, not a universal ERP parser.
+Este repositório representa um **case de arquitetura e automação**, não um parser universal para qualquer ERP.
 
-## Project evolution
+## Evolução do projeto
 
-The first version of this solution was built with **Google Apps Script**. It worked for the initial use case, but the project later needed more routing, multiple report types, validation, error handling, PDF generation, and different output formats.
+A primeira versão dessa solução foi desenvolvida com **Google Apps Script**.
 
-Moving to n8n made the orchestration visual and modular while still allowing JavaScript where code was the better fit.
+Ela atendia ao objetivo inicial, mas o projeto passou a exigir múltiplos tipos de relatório, diferentes rotas de processamento, validações, tratamento de erros, geração de PDF e múltiplos formatos de saída.
 
-## Cloud and DevOps connection
+A migração para o n8n permitiu organizar a orquestração de forma visual e modular, mantendo JavaScript nos pontos em que código oferecia maior controle.
 
-**AWS was not used directly in this implementation.**
+## Relação com Cloud e DevOps
 
-However, the project applies concepts that transfer well to Cloud and DevOps environments:
+**AWS não foi utilizada diretamente nesta implementação.**
 
-- workflow orchestration
-- event-driven processing
-- modular processing stages
-- input/output contracts
-- validation gates
-- structured error handling
-- containerized dependencies
-- separation between data processing and presentation
-- future observability and monitoring
+Mesmo assim, a arquitetura utiliza conceitos que podem ser transferidos para ambientes de Cloud e DevOps, como:
 
-## License
+- orquestração de workflows;
+- processamento orientado a eventos;
+- etapas modulares;
+- contratos de entrada e saída;
+- validação antes do processamento;
+- tratamento estruturado de erros;
+- serviços containerizados;
+- separação entre processamento e apresentação;
+- possibilidades futuras de observabilidade e monitoramento.
 
-MIT License — see [LICENSE](LICENSE).
+## Tecnologias
+
+- n8n
+- JavaScript
+- HTML5 / CSS3 / SVG
+- Docker
+- Gotenberg
+- XLS / XLSX
+- JSON
+- Workflow Orchestration
+- Data Validation
+- Error Handling
+
+## Licença
+
+MIT License — consulte [LICENSE](LICENSE).
