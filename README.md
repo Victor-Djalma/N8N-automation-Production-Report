@@ -24,7 +24,8 @@ Upload → Validação → Processamento → Geração → Download
 
 ## Visão do workflow
 
-(IMAGEM)
+<img width="1592" height="627" alt="Workflow N8N" src="https://github.com/user-attachments/assets/19019b8f-6ae4-4c00-9f23-94f4c0445096" />
+
 
 ## Arquitetura
 
