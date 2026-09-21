@@ -1,0 +1,1015 @@
+{
+  "name": "ERP Report Automation Hub - Public",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "ERP Report Automation Hub",
+        "formDescription": "Selecione o tipo de relatório e envie o arquivo exportado do ERP para processamento automático.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Tipo de Relatório → Módulo do ERP",
+              "fieldType": "dropdown",
+              "fieldName": "TIPO_MODULO",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Produção"
+                  },
+                  {
+                    "option": "Compras"
+                  },
+                  {
+                    "option": "Vendas"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "MÊS",
+              "fieldType": "dropdown",
+              "fieldName": "MES",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "JANEIRO"
+                  },
+                  {
+                    "option": "FEVEREIRO"
+                  },
+                  {
+                    "option": "MARÇO"
+                  },
+                  {
+                    "option": "ABRIL"
+                  },
+                  {
+                    "option": "MAIO"
+                  },
+                  {
+                    "option": "JUNHO"
+                  },
+                  {
+                    "option": "JULHO"
+                  },
+                  {
+                    "option": "AGOSTO"
+                  },
+                  {
+                    "option": "SETEMBRO"
+                  },
+                  {
+                    "option": "OUTUBRO"
+                  },
+                  {
+                    "option": "NOVEMBRO"
+                  },
+                  {
+                    "option": "DEZEMBRO"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "ANO",
+              "fieldName": "ANO"
+            },
+            {
+              "fieldLabel": "Relatório ERP → Arquivo do ERP no formato EXCEL (XLS)",
+              "fieldType": "file",
+              "fieldName": "RELATORIO_ERP"
+            },
+            {
+              "fieldLabel": "Saída de Arquivo → Tipo de Saída",
+              "fieldType": "dropdown",
+              "fieldName": "TIPO_SAIDA",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Relatório Bruto → Detalhado"
+                  },
+                  {
+                    "option": "Relatório Executivo → Indicadores e Resumido"
+                  },
+                  {
+                    "option": "Ambos Relatórios"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "7f2c1301-6eea-479d-be46-e7b7e1f93e00",
+      "name": "Envio de Relatório ERP"
+    },
+    {
+      "parameters": {
+        "operation": "xls",
+        "binaryPropertyName": "RELATORIO_ERP",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "016f727d-1bad-48d8-b060-1b5eb87be79c",
+      "name": "Extração de Dados Brutos"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bed81862-9993-4b8c-a18b-4aa853ae41fd",
+                    "leftValue": "={{ $('Envio de Relatório ERP').first().json.TIPO_MODULO }}",
+                    "rightValue": "Produção",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a9127d9c-e40a-4007-8b10-5895ba7937fe",
+                    "leftValue": "={{ $('Envio de Relatório ERP').first().json.TIPO_MODULO }}",
+                    "rightValue": "Compras",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "dac84d95-f896-41b4-90b7-c66e45cf4f0e",
+                    "leftValue": "={{ $('Envio de Relatório ERP').first().json.TIPO_MODULO }}",
+                    "rightValue": "Vendas",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "0fa15047-7952-4d44-96aa-4d1708f7cd1f",
+      "name": "Switch - Decisão de Relatórios"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst form = $('Envio de Relatório ERP').first().json;\n\n// =====================================================\n// CONFIGURAÇÕES / FUNÇÕES\n// =====================================================\n\nconst meses = {\n  JANEIRO: 1,\n  FEVEREIRO: 2,\n  MARÇO: 3,\n  ABRIL: 4,\n  MAIO: 5,\n  JUNHO: 6,\n  JULHO: 7,\n  AGOSTO: 8,\n  SETEMBRO: 9,\n  OUTUBRO: 10,\n  NOVEMBRO: 11,\n  DEZEMBRO: 12\n};\n\nfunction numero(valor) {\n  if (typeof valor === 'number') return valor;\n\n  if (valor === null || valor === undefined || valor === '') {\n    return 0;\n  }\n\n  let texto = String(valor).trim();\n\n  // Brasileiro: 669.859,0000\n  if (texto.includes(',')) {\n    texto = texto\n      .replace(/\\./g, '')\n      .replace(',', '.');\n  }\n\n  const n = Number(texto);\n\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction limparDescricao(valor) {\n  return String(valor || '')\n    .replace(/^\\s*-\\s*/, '')\n    .trim();\n}\n\nfunction normalizarData(valor) {\n\n  if (valor === null || valor === undefined) {\n    return null;\n  }\n\n  // Excel serial date\n  if (typeof valor === 'number' && valor > 20000) {\n\n    const excelEpoch = new Date(Date.UTC(1899, 11, 30));\n    const data = new Date(\n      excelEpoch.getTime() +\n      valor * 86400000\n    );\n\n    const ano = data.getUTCFullYear();\n    const mes = data.getUTCMonth() + 1;\n    const dia = data.getUTCDate();\n\n    return {\n      iso:\n        `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`,\n      dia,\n      mes,\n      ano\n    };\n  }\n\n  const texto = String(valor).trim();\n\n  // 2026-08-03...\n  let match = texto.match(\n    /^(\\d{4})-(\\d{2})-(\\d{2})/\n  );\n\n  if (match) {\n\n    const ano = Number(match[1]);\n    const mes = Number(match[2]);\n    const dia = Number(match[3]);\n\n    return {\n      iso: `${match[1]}-${match[2]}-${match[3]}`,\n      dia,\n      mes,\n      ano\n    };\n  }\n\n  // 03/08/2026\n  match = texto.match(\n    /^(\\d{2})\\/(\\d{2})\\/(\\d{4})/\n  );\n\n  if (match) {\n\n    const dia = Number(match[1]);\n    const mes = Number(match[2]);\n    const ano = Number(match[3]);\n\n    return {\n      iso:\n        `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`,\n      dia,\n      mes,\n      ano\n    };\n  }\n\n  return null;\n}\n\nfunction valoresLinha(json) {\n\n  return Object.values(json || {})\n    .filter(valor =>\n      valor !== null &&\n      valor !== undefined &&\n      String(valor).trim() !== ''\n    );\n}\n\n// =====================================================\n// DADOS DO FORM\n// =====================================================\n\nconst mesFormularioTexto =\n  String(form.MES || '')\n    .trim()\n    .toUpperCase();\n\nconst mesFormulario =\n  meses[mesFormularioTexto];\n\nconst anoFormularioTexto =\n  String(form.ANO || '').trim();\n\nconst anoFormulario =\n  Number(anoFormularioTexto);\n\n// =====================================================\n// LINHAS EXTRAÍDAS DO XLS\n// =====================================================\n\nconst linhas = items\n  .map(item => valoresLinha(item.json))\n  .filter(valores => valores.length > 0);\n\n// =====================================================\n// IDENTIFICA O RELATÓRIO\n// =====================================================\n\nconst ehRelatorioProducao =\n  linhas.some(valores => {\n\n    const texto =\n      valores.join(' ').toUpperCase();\n\n    return (\n      texto.includes(\n        'RELATÓRIO DE ENTRADA DE PRODUÇÃO'\n      ) ||\n      texto.includes(\n        'RELATORIO DE ENTRADA DE PRODUCAO'\n      )\n    );\n  });\n\n// =====================================================\n// PARSER\n// =====================================================\n\nconst ordens = [];\n\nlet produtoAtual = null;\nlet ordemAtual = null;\n\nfor (\n  let indice = 0;\n  indice < linhas.length;\n  indice++\n) {\n\n  const valores = linhas[indice];\n\n  const primeiro = valores[0];\n  const segundo = valores[1];\n\n  // ---------------------------------------------------\n  // CABEÇALHO DO PRODUTO\n  //\n  // 1001 - PRODUCT A...\n  // ---------------------------------------------------\n\n  if (\n    valores.length <= 2 &&\n    primeiro !== undefined &&\n    segundo !== undefined &&\n    /^\\d+$/.test(String(primeiro).replace('.0', '')) &&\n    String(segundo).trim().startsWith('-')\n  ) {\n\n    const codigo =\n      Number(primeiro);\n\n    if (codigo !== 1) {\n\n      produtoAtual = {\n        codigoProduto: codigo,\n        produto:\n          limparDescricao(segundo)\n      };\n\n      continue;\n    }\n  }\n\n  // ---------------------------------------------------\n  // ORDEM DE PRODUÇÃO\n  //\n  // 1 - PRODUÇÃO DOC DATA QTD UN VLR VLR TOTAL\n  // ---------------------------------------------------\n\n  if (\n    primeiro !== undefined &&\n    Number(primeiro) === 1 &&\n    segundo !== undefined &&\n    String(segundo)\n      .toUpperCase()\n      .includes('PRODU')\n  ) {\n\n    if (!produtoAtual) {\n      continue;\n    }\n\n    const data =\n      normalizarData(valores[3]);\n\n    ordemAtual = {\n\n      numeroSequencial:\n        ordens.length + 1,\n\n      tipoRegistro:\n        'ORDEM_PRODUCAO',\n\n      linhaOrigem:\n        indice + 1,\n\n      codigoProduto:\n        produtoAtual.codigoProduto,\n\n      produto:\n        produtoAtual.produto,\n\n      documento:\n        valores[2] !== undefined\n          ? String(valores[2])\n          : null,\n\n      dataEntrada:\n        data?.iso || null,\n\n      quantidadeProduzida:\n        numero(valores[4]),\n\n      unidade:\n        valores[5]\n          ? String(valores[5]).trim()\n          : null,\n\n      valorUnitario:\n        numero(valores[6]),\n\n      valorTotal:\n        numero(valores[7]),\n\n      materiaisUtilizados: []\n    };\n\n    ordens.push(ordemAtual);\n\n    continue;\n  }\n\n  // ---------------------------------------------------\n  // MATERIAL CONSUMIDO\n  //\n  // 2001 - MATERIAL A... QTD UN VALOR VALOR TOTAL\n  // ---------------------------------------------------\n\n  if (\n    ordemAtual &&\n    valores.length >= 5 &&\n    primeiro !== undefined &&\n    segundo !== undefined &&\n    Number(primeiro) !== 1 &&\n    String(segundo).trim().startsWith('-')\n  ) {\n\n    const codigoMaterial =\n      Number(primeiro);\n\n    if (\n      Number.isFinite(codigoMaterial)\n    ) {\n\n      ordemAtual.materiaisUtilizados.push({\n\n        codigoMaterial,\n\n        material:\n          limparDescricao(segundo),\n\n        quantidade:\n          numero(valores[2]),\n\n        unidade:\n          valores[3]\n            ? String(valores[3]).trim()\n            : null,\n\n        valorUnitario:\n          numero(valores[4]),\n\n        valorTotal:\n          numero(valores[5])\n      });\n    }\n  }\n}\n\n// =====================================================\n// QUANTIDADE DE MATERIAIS POR OP\n// =====================================================\n\nfor (const ordem of ordens) {\n\n  ordem.quantidadeMateriais =\n    ordem.materiaisUtilizados.length;\n}\n\n// =====================================================\n// AGREGAÇÃO POR PRODUTO\n// =====================================================\n\nconst produtosMap = {};\n\nfor (const ordem of ordens) {\n\n  const chave =\n    String(ordem.codigoProduto);\n\n  if (!produtosMap[chave]) {\n\n    produtosMap[chave] = {\n\n      codigoProduto:\n        ordem.codigoProduto,\n\n      produto:\n        ordem.produto,\n\n      totalUnidades: 0,\n\n      totalOrdens: 0,\n\n      valorTotal: 0\n    };\n  }\n\n  produtosMap[chave].totalUnidades +=\n    ordem.quantidadeProduzida;\n\n  produtosMap[chave].totalOrdens++;\n\n  produtosMap[chave].valorTotal +=\n    ordem.valorTotal;\n}\n\nconst produtos =\n  Object.values(produtosMap);\n\n// =====================================================\n// RANKING DE PRODUTOS\n// =====================================================\n\nconst rankingProdutos =\n  [...produtos].sort(\n    (a, b) =>\n      b.totalUnidades -\n      a.totalUnidades\n  );\n\nconst maisProduzido =\n  rankingProdutos[0] || null;\n\nconst menosProduzido =\n  rankingProdutos.length\n    ? rankingProdutos[\n        rankingProdutos.length - 1\n      ]\n    : null;\n\n// =====================================================\n// PRODUÇÃO POR DIA\n// =====================================================\n\nconst diasMap = {};\n\nfor (const ordem of ordens) {\n\n  const data =\n    ordem.dataEntrada;\n\n  if (!data) continue;\n\n  if (!diasMap[data]) {\n\n    diasMap[data] = {\n\n      data,\n\n      totalOrdens: 0,\n\n      totalUnidades: 0,\n\n      valorTotal: 0\n    };\n  }\n\n  diasMap[data].totalOrdens++;\n\n  diasMap[data].totalUnidades +=\n    ordem.quantidadeProduzida;\n\n  diasMap[data].valorTotal +=\n    ordem.valorTotal;\n}\n\nconst producaoPorDia =\n  Object.values(diasMap)\n    .sort(\n      (a, b) =>\n        a.data.localeCompare(b.data)\n    );\n\n// =====================================================\n// TOTAIS CALCULADOS\n// =====================================================\n\nconst totalUnidades =\n  ordens.reduce(\n    (total, ordem) =>\n      total +\n      ordem.quantidadeProduzida,\n    0\n  );\n\nconst valorTotal =\n  ordens.reduce(\n    (total, ordem) =>\n      total +\n      ordem.valorTotal,\n    0\n  );\n\n// =====================================================\n// LOCALIZA TOTAL GERAL INFORMADO PELO ERP\n// =====================================================\n\nlet totalUnidadesERP = null;\nlet valorTotalERP = null;\n\nfor (const valores of linhas) {\n\n  const texto =\n    valores.join(' ');\n\n  if (\n    !texto\n      .toUpperCase()\n      .includes('TOTAL GERAL')\n  ) {\n    continue;\n  }\n\n  // Ex:\n  // Total Geral: 10.000,0000 50.000,0000\n\n  const numerosBR =\n    texto.match(\n      /[\\d.]+,\\d{2,4}/g\n    );\n\n  if (\n    numerosBR &&\n    numerosBR.length >= 2\n  ) {\n\n    totalUnidadesERP =\n      numero(numerosBR[0]);\n\n    valorTotalERP =\n      numero(numerosBR[1]);\n\n    break;\n  }\n\n  // Caso o n8n já transforme\n  // as células em números\n  const numeros =\n    valores\n      .map(v => numero(v))\n      .filter(v => v > 0);\n\n  if (numeros.length >= 2) {\n\n    totalUnidadesERP =\n      numeros[numeros.length - 2];\n\n    valorTotalERP =\n      numeros[numeros.length - 1];\n  }\n}\n\n// =====================================================\n// VALIDAÇÃO\n// =====================================================\n\nconst erros = [];\nconst alertas = [];\n\nif (!ehRelatorioProducao) {\n\n  erros.push(\n    'O arquivo enviado não foi identificado como Relatório de Entrada de Produção.'\n  );\n}\n\nif (ordens.length === 0) {\n\n  erros.push(\n    'Nenhuma ordem de produção válida foi encontrada no arquivo.'\n  );\n}\n\nif (!mesFormulario) {\n\n  erros.push(\n    `Mês informado no formulário é inválido: ${form.MES}`\n  );\n}\n\nif (\n  !/^\\d{4}$/.test(\n    anoFormularioTexto\n  )\n) {\n\n  erros.push(\n    `Ano informado no formulário é inválido: ${form.ANO}`\n  );\n}\n\n// =====================================================\n// VALIDA MÊS / ANO DAS ORDENS\n// =====================================================\n\nif (\n  mesFormulario &&\n  /^\\d{4}$/.test(\n    anoFormularioTexto\n  )\n) {\n\n  const competenciasErradas =\n    new Set();\n\n  for (const ordem of ordens) {\n\n    if (!ordem.dataEntrada) {\n      continue;\n    }\n\n    const data =\n      normalizarData(\n        ordem.dataEntrada\n      );\n\n    if (!data) continue;\n\n    if (\n      data.mes !== mesFormulario ||\n      data.ano !== anoFormulario\n    ) {\n\n      competenciasErradas.add(\n        `${String(data.mes).padStart(2, '0')}/${data.ano}`\n      );\n    }\n  }\n\n  if (\n    competenciasErradas.size > 0\n  ) {\n\n    erros.push(\n      `A competência informada (${mesFormularioTexto}/${anoFormulario}) não corresponde às datas encontradas no relatório.`\n    );\n  }\n}\n\n// =====================================================\n// CONFERE TOTAL DO ERP\n// =====================================================\n\nif (\n  totalUnidadesERP !== null\n) {\n\n  const diferencaUnidades =\n    Math.abs(\n      totalUnidades -\n      totalUnidadesERP\n    );\n\n  if (diferencaUnidades > 0.01) {\n\n    alertas.push(\n      `O total de unidades calculado pelo parser (${totalUnidades}) não corresponde ao total informado pelo ERP (${totalUnidadesERP}).`\n    );\n  }\n}\n\nif (\n  valorTotalERP !== null\n) {\n\n  const diferencaValor =\n    Math.abs(\n      valorTotal -\n      valorTotalERP\n    );\n\n  if (diferencaValor > 0.05) {\n\n    alertas.push(\n      `O valor total calculado pelo parser (${valorTotal.toFixed(2)}) não corresponde ao total informado pelo ERP (${valorTotalERP.toFixed(2)}).`\n    );\n  }\n}\n\nif (\n  ehRelatorioProducao &&\n  (\n    totalUnidadesERP === null ||\n    valorTotalERP === null\n  )\n) {\n\n  alertas.push(\n    'Não foi possível localizar o Total Geral informado pelo ERP.'\n  );\n}\n\n// =====================================================\n// STATUS FINAL\n// =====================================================\n\nlet status = 'OK';\n\nif (erros.length > 0) {\n\n  status = 'ERRO';\n\n} else if (alertas.length > 0) {\n\n  status = 'ALERTA';\n}\n\nconst parserOk =\n  status !== 'ERRO';\n\n// =====================================================\n// SAÍDA PADRONIZADA\n// =====================================================\n\nreturn [{\n  json: {\n\n    parserOk,\n    status,\n\n    modulo:\n      'PRODUCAO',\n\n    competencia: {\n\n      mes:\n        mesFormularioTexto,\n\n      numeroMes:\n        mesFormulario,\n\n      ano:\n        anoFormulario,\n\n      primeiraProducao:\n        producaoPorDia.length\n          ? producaoPorDia[0].data\n          : null,\n\n      ultimaProducao:\n        producaoPorDia.length\n          ? producaoPorDia[\n              producaoPorDia.length - 1\n            ].data\n          : null\n    },\n\n    validacao: {\n\n      totalLinhasLidas:\n        linhas.length,\n\n      totalOrdensEncontradas:\n        ordens.length,\n\n      totalUnidadesERP,\n\n      totalUnidadesCalculado:\n        totalUnidades,\n\n      valorTotalERP,\n\n      valorTotalCalculado:\n        valorTotal,\n\n      diferencaUnidades:\n        totalUnidadesERP !== null\n          ? Math.abs(\n              totalUnidades -\n              totalUnidadesERP\n            )\n          : null,\n\n      diferencaValor:\n        valorTotalERP !== null\n          ? Math.abs(\n              valorTotal -\n              valorTotalERP\n            )\n          : null,\n\n      alertas,\n      erros\n    },\n\n    resumo: {\n\n      totalOrdens:\n        ordens.length,\n\n      totalProdutos:\n        produtos.length,\n\n      totalDiasProducao:\n        producaoPorDia.length,\n\n      totalUnidades,\n\n      valorTotal,\n\n      mediaPorOrdem:\n        ordens.length\n          ? totalUnidades /\n            ordens.length\n          : 0,\n\n      maisProduzido,\n\n      menosProduzido\n    },\n\n    ordens,\n\n    produtos,\n\n    producaoPorDia,\n\n    rankingProdutos\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        -256
+      ],
+      "id": "5dee17d6-0e60-4d48-a0b0-e8c565825c98",
+      "name": "PARSER - PRODUÇÃO"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// =====================================================\n// FUNÇÕES\n// =====================================================\n\nfunction numeroBR(valor) {\n  if (valor === null || valor === undefined || valor === '') return 0;\n\n  return Number(\n    String(valor)\n      .replace(/\\./g, '')\n      .replace(',', '.')\n  );\n}\n\n// =====================================================\n// TRANSFORMA TUDO QUE VEIO DO XLS EM LINHAS DE TEXTO\n// =====================================================\n\nconst linhas = [];\n\nfor (const item of items) {\n  for (const valor of Object.values(item.json || {})) {\n    if (valor === null || valor === undefined) continue;\n\n    const texto = String(valor).trim();\n\n    if (texto) {\n      linhas.push(texto);\n    }\n  }\n}\n\n// =====================================================\n// IDENTIFICA O RELATÓRIO\n// =====================================================\n\nconst ehRelatorioCompras = linhas.some(linha =>\n  linha.toUpperCase().includes('RELATÓRIO DE COMPRAS SINTÉTICO') ||\n  linha.toUpperCase().includes('RELATORIO DE COMPRAS SINTETICO')\n);\n\n// =====================================================\n// DATA DE GERAÇÃO DO RELATÓRIO\n// =====================================================\n\nlet dataGeracao = null;\n\nfor (const linha of linhas) {\n  const match = linha.match(/Data:\\s*(\\d{2}\\/\\d{2}\\/\\d{4})/i);\n\n  if (match) {\n    dataGeracao = match[1];\n    break;\n  }\n}\n\n// =====================================================\n// REGEX DAS COMPRAS\n// =====================================================\n\nconst regexCompra =\n  /^\\s*(\\S+)\\s+-\\s+(\\d+)\\s+(.+?)\\s+([\\d.]+,\\d{2})\\s+([\\d.,]+)\\s*$/;\n\nconst compras = [];\n\n// =====================================================\n// LÊ AS LINHAS\n// =====================================================\n\nfor (const linha of linhas) {\n\n  const match = linha.match(regexCompra);\n\n  if (!match) continue;\n\n  const [\n    _,\n    documento,\n    codigoFornecedor,\n    fornecedor,\n    valorLiquido,\n    percentual\n  ] = match;\n\n  compras.push({\n    documento: documento.trim(),\n    codigoFornecedor: codigoFornecedor.trim(),\n    fornecedor: fornecedor.trim(),\n    valorLiquido: numeroBR(valorLiquido),\n    percentual: numeroBR(percentual)\n  });\n}\n\n// =====================================================\n// TOTAL INFORMADO PELO ERP\n// =====================================================\n\nlet totalInformadoERP = null;\n\nfor (const linha of linhas) {\n\n  const match = linha.match(\n    /Total Compras\\/Despesas\\s+([\\d.]+,\\d{2})/i\n  );\n\n  if (match) {\n    totalInformadoERP = numeroBR(match[1]);\n    break;\n  }\n}\n\n// =====================================================\n// TOTAL CALCULADO\n// =====================================================\n\nconst totalCalculado = compras.reduce(\n  (total, compra) => total + compra.valorLiquido,\n  0\n);\n\n// =====================================================\n// AGRUPAMENTO POR FORNECEDOR\n// =====================================================\n\nconst mapaFornecedores = {};\n\nfor (const compra of compras) {\n\n  const chave = `${compra.codigoFornecedor}-${compra.fornecedor}`;\n\n  if (!mapaFornecedores[chave]) {\n\n    mapaFornecedores[chave] = {\n      codigoFornecedor: compra.codigoFornecedor,\n      fornecedor: compra.fornecedor,\n      quantidadeCompras: 0,\n      valorTotal: 0\n    };\n  }\n\n  mapaFornecedores[chave].quantidadeCompras++;\n  mapaFornecedores[chave].valorTotal += compra.valorLiquido;\n}\n\nconst fornecedores = Object.values(mapaFornecedores)\n  .sort((a, b) => b.valorTotal - a.valorTotal);\n\n// =====================================================\n// RANKINGS\n// =====================================================\n\nconst comprasOrdenadas = [...compras]\n  .sort((a, b) => b.valorLiquido - a.valorLiquido);\n\nconst maiorCompra =\n  comprasOrdenadas.length > 0\n    ? comprasOrdenadas[0]\n    : null;\n\nconst menorCompra =\n  comprasOrdenadas.length > 0\n    ? comprasOrdenadas[comprasOrdenadas.length - 1]\n    : null;\n\nconst maiorFornecedor =\n  fornecedores.length > 0\n    ? fornecedores[0]\n    : null;\n\nconst menorFornecedor =\n  fornecedores.length > 0\n    ? fornecedores[fornecedores.length - 1]\n    : null;\n\n// =====================================================\n// VALIDAÇÃO DO PARSER\n// =====================================================\n\nlet status = 'OK';\nlet parserOk = true;\nconst alertas = [];\nconst erros = [];\n\nif (!ehRelatorioCompras) {\n\n  parserOk = false;\n  status = 'ERRO';\n\n  erros.push(\n    'O arquivo enviado não foi identificado como Relatório de Compras Sintético.'\n  );\n}\n\nif (compras.length === 0) {\n\n  parserOk = false;\n  status = 'ERRO';\n\n  erros.push(\n    'Nenhuma compra/despesa válida foi encontrada no arquivo.'\n  );\n}\n\n// Confere se nossa soma bate com o ERP\nif (\n  parserOk &&\n  totalInformadoERP !== null\n) {\n\n  const diferenca =\n    Math.abs(totalCalculado - totalInformadoERP);\n\n  if (diferenca > 0.02) {\n\n    status = 'ALERTA';\n\n    alertas.push(\n      `O total calculado (${totalCalculado.toFixed(2)}) não corresponde ao total informado pelo ERP (${totalInformadoERP.toFixed(2)}).`\n    );\n  }\n}\n\n// =====================================================\n// SAÍDA PADRONIZADA\n// =====================================================\n\nreturn [{\n  json: {\n\n    parserOk,\n    status,\n\n    modulo: 'COMPRAS',\n\n    dataGeracao,\n\n    validacao: {\n      totalLinhasLidas: linhas.length,\n      totalLancamentosEncontrados: compras.length,\n      totalInformadoERP,\n      totalCalculado,\n      diferencaTotal:\n        totalInformadoERP !== null\n          ? Math.abs(totalCalculado - totalInformadoERP)\n          : null,\n      alertas,\n      erros\n    },\n\n    resumo: {\n      totalLancamentos: compras.length,\n      totalFornecedores: fornecedores.length,\n      totalGasto: totalCalculado,\n\n      maiorCompra,\n      menorCompra,\n\n      maiorFornecedor,\n      menorFornecedor\n    },\n\n    compras,\n\n    fornecedores,\n\n    rankingFornecedores: fornecedores.slice(0, 10)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        0
+      ],
+      "id": "5c7a77b2-85f7-4f98-b8c1-45b2ceb9f2ba",
+      "name": "PARSER - COMPRAS"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst form = $('Envio de Relatório ERP').first().json;\n\n// =====================================================\n// FUNÇÕES\n// =====================================================\n\nfunction numeroBR(valor) {\n  if (typeof valor === 'number') return valor;\n\n  if (valor === null || valor === undefined || valor === '') {\n    return 0;\n  }\n\n  return Number(\n    String(valor)\n      .replace(/\\./g, '')\n      .replace(',', '.')\n  );\n}\n\nfunction dataISO(dataBR) {\n  const [dia, mes, ano] = dataBR.split('/');\n  return `${ano}-${mes}-${dia}`;\n}\n\nfunction competenciaData(dataBR) {\n  const [, mes, ano] = dataBR.split('/');\n\n  return {\n    mes: Number(mes),\n    ano: Number(ano)\n  };\n}\n\nconst meses = {\n  JANEIRO: 1,\n  FEVEREIRO: 2,\n  MARÇO: 3,\n  ABRIL: 4,\n  MAIO: 5,\n  JUNHO: 6,\n  JULHO: 7,\n  AGOSTO: 8,\n  SETEMBRO: 9,\n  OUTUBRO: 10,\n  NOVEMBRO: 11,\n  DEZEMBRO: 12\n};\n\n// =====================================================\n// DADOS DO FORMULÁRIO\n// =====================================================\n\nconst mesFormularioTexto = String(form.MES || '')\n  .trim()\n  .toUpperCase();\n\nconst mesFormulario = meses[mesFormularioTexto];\n\nconst anoFormularioTexto = String(form.ANO || '').trim();\nconst anoFormulario = Number(anoFormularioTexto);\n\n// =====================================================\n// TRANSFORMA XLS EM LINHAS\n// =====================================================\n\nconst linhas = [];\n\nfor (const item of items) {\n\n  const valores = Object.values(item.json || {})\n    .filter(valor =>\n      valor !== null &&\n      valor !== undefined &&\n      String(valor).trim() !== ''\n    );\n\n  if (valores.length === 0) continue;\n\n  linhas.push(\n    valores.map(v => String(v)).join(' ').trim()\n  );\n}\n\n// =====================================================\n// IDENTIFICA O RELATÓRIO\n// =====================================================\n\nconst ehRelatorioVendas = linhas.some(linha => {\n\n  const texto = linha.toUpperCase();\n\n  return (\n    texto.includes('RELATÓRIO DE VENDAS') ||\n    texto.includes('RELATORIO DE VENDAS')\n  );\n});\n\n// =====================================================\n// PERÍODO INFORMADO PELO ERP\n// =====================================================\n\nlet dataInicial = null;\nlet dataFinal = null;\n\nfor (const linha of linhas) {\n\n  const match = linha.match(\n    /Relat[oó]rio de Vendas de\\s+(\\d{2}\\/\\d{2}\\/\\d{4})\\s+[àa]\\s+(\\d{2}\\/\\d{2}\\/\\d{4})/i\n  );\n\n  if (match) {\n    dataInicial = match[1];\n    dataFinal = match[2];\n    break;\n  }\n}\n\n// =====================================================\n// REGEX\n// =====================================================\n\nconst numeroRegex = '-?[\\\\d.]+,\\\\d{2,4}';\n\nconst regexVenda = new RegExp(\n  '^\\\\s*' +\n  '(\\\\d{2}\\\\/\\\\d{2}\\\\/\\\\d{4})\\\\s+' + // Data\n  '(\\\\d+)\\\\s+' +                     // Empresa\n  '(\\\\S+)\\\\s+' +                     // Documento\n  '(.+?)\\\\s+' +                      // Cliente\n  `(${numeroRegex})\\\\s+` +           // Quantidade\n  '([A-Za-z]+)\\\\s+' +                // Unidade\n  `(${numeroRegex})\\\\s+` +           // Valor Unitário\n  `(${numeroRegex})\\\\s+` +           // Desconto Comercial\n  `(${numeroRegex})\\\\s+` +           // Desc/Acréscimo Financeiro\n  `(${numeroRegex})\\\\s+` +           // Líquido\n  `(${numeroRegex})\\\\s+` +           // ICMS\n  `(${numeroRegex})\\\\s+` +           // IPI\n  `(${numeroRegex})\\\\s+` +           // Outros\n  `(${numeroRegex})` +               // TOTAL\n  '\\\\s*\\\\+?\\\\s*$'\n);\n\nconst regexProduto =\n  /^\\s*(\\d+)\\s+-\\s+(.+?)\\s*$/;\n\n// =====================================================\n// PARSER\n// =====================================================\n\nconst produtosMap = {};\nconst vendas = [];\n\nlet produtoAtual = null;\n\nfor (const linha of linhas) {\n\n  // ---------------------------------------------------\n  // CABEÇALHO DO PRODUTO\n  // Ex:\n  // 1001 - PRODUCT A\n  // ---------------------------------------------------\n\n  const produtoMatch = linha.match(regexProduto);\n\n  if (\n    produtoMatch &&\n    !linha.match(/^\\d{2}\\/\\d{2}\\/\\d{4}/)\n  ) {\n\n    const codigoProduto = produtoMatch[1];\n    const produto = produtoMatch[2].trim();\n\n    if (!produtosMap[codigoProduto]) {\n      produtosMap[codigoProduto] = {\n        codigoProduto,\n        produto,\n        vendas: []\n      };\n    }\n\n    produtoAtual = produtosMap[codigoProduto];\n\n    continue;\n  }\n\n  // ---------------------------------------------------\n  // LINHA DE VENDA\n  // ---------------------------------------------------\n\n  const vendaMatch = linha.match(regexVenda);\n\n  if (!vendaMatch) continue;\n\n  if (!produtoAtual) continue;\n\n  const [\n    _,\n    data,\n    empresa,\n    documento,\n    clienteCompleto,\n    quantidade,\n    unidade,\n    valorUnitario,\n    descontoComercial,\n    ajusteFinanceiro,\n    valorLiquido,\n    icms,\n    ipi,\n    outrosValores,\n    valorTotal\n  ] = vendaMatch;\n\n  // Cliente vem como:\n  // 2001 - CUSTOMER EXAMPLE\n\n  let codigoCliente = null;\n  let cliente = clienteCompleto.trim();\n\n  const clienteMatch =\n    cliente.match(/^(\\d+)\\s*-\\s*(.+)$/);\n\n  if (clienteMatch) {\n    codigoCliente = clienteMatch[1];\n    cliente = clienteMatch[2].trim();\n  }\n\n  const venda = {\n    data: dataISO(data),\n    dataOriginal: data,\n\n    empresa,\n    documento,\n\n    codigoCliente,\n    cliente,\n\n    codigoProduto: produtoAtual.codigoProduto,\n    produto: produtoAtual.produto,\n\n    quantidade: numeroBR(quantidade),\n    unidade: unidade.trim(),\n\n    valorUnitario: numeroBR(valorUnitario),\n\n    descontoComercial:\n      numeroBR(descontoComercial),\n\n    ajusteFinanceiro:\n      numeroBR(ajusteFinanceiro),\n\n    valorLiquido:\n      numeroBR(valorLiquido),\n\n    icms:\n      numeroBR(icms),\n\n    ipi:\n      numeroBR(ipi),\n\n    outrosValores:\n      numeroBR(outrosValores),\n\n    valorTotal:\n      numeroBR(valorTotal)\n  };\n\n  produtoAtual.vendas.push(venda);\n  vendas.push(venda);\n}\n\n// =====================================================\n// REMOVE PRODUTOS SEM VENDA\n// =====================================================\n\nconst produtos = Object.values(produtosMap)\n  .filter(produto => produto.vendas.length > 0);\n\n// =====================================================\n// TOTALIZA PRODUTOS\n// =====================================================\n\nfor (const produto of produtos) {\n\n  produto.totalUnidades =\n    produto.vendas.reduce(\n      (total, venda) =>\n        total + venda.quantidade,\n      0\n    );\n\n  produto.totalValor =\n    produto.vendas.reduce(\n      (total, venda) =>\n        total + venda.valorTotal,\n      0\n    );\n\n  produto.totalLiquido =\n    produto.vendas.reduce(\n      (total, venda) =>\n        total + venda.valorLiquido,\n      0\n    );\n\n  produto.quantidadeVendas =\n    produto.vendas.length;\n}\n\n// =====================================================\n// TOTAL GERAL CALCULADO\n// =====================================================\n\nconst totalUnidades = vendas.reduce(\n  (total, venda) => total + venda.quantidade,\n  0\n);\n\nconst totalValor = vendas.reduce(\n  (total, venda) => total + venda.valorTotal,\n  0\n);\n\nconst totalLiquido = vendas.reduce(\n  (total, venda) => total + venda.valorLiquido,\n  0\n);\n\n// =====================================================\n// TOTAL GERAL INFORMADO PELO ERP\n// =====================================================\n\nlet totalInformadoERP = null;\n\nfor (const linha of linhas) {\n\n  if (!/^\\s*Vendas:/i.test(linha)) {\n    continue;\n  }\n\n  const numeros =\n    linha.match(/-?[\\d.]+,\\d{2,4}/g);\n\n  // Linha final possui:\n  // Bruto\n  // Desconto Comercial\n  // Desconto Financeiro\n  // Líquido\n  // ICMS\n  // IPI\n  // Outros\n  // TOTAL\n  // Preço Médio\n\n  if (numeros && numeros.length >= 8) {\n    totalInformadoERP =\n      numeroBR(numeros[7]);\n  }\n}\n\n// =====================================================\n// CLIENTES\n// =====================================================\n\nconst clientesUnicos = new Set();\n\nfor (const venda of vendas) {\n\n  clientesUnicos.add(\n    venda.codigoCliente ||\n    venda.cliente\n  );\n}\n\n// =====================================================\n// PEDIDOS\n// =====================================================\n\nconst pedidosMap = {};\n\nfor (const venda of vendas) {\n\n  if (!pedidosMap[venda.documento]) {\n\n    pedidosMap[venda.documento] = {\n      documento: venda.documento,\n      valorTotal: 0,\n      quantidade: 0\n    };\n  }\n\n  pedidosMap[venda.documento].valorTotal +=\n    venda.valorTotal;\n\n  pedidosMap[venda.documento].quantidade +=\n    venda.quantidade;\n}\n\nconst pedidos =\n  Object.values(pedidosMap);\n\n// =====================================================\n// RANKINGS\n// =====================================================\n\nconst rankingUnidades = [...produtos]\n  .sort(\n    (a, b) =>\n      b.totalUnidades - a.totalUnidades\n  );\n\nconst rankingValor = [...produtos]\n  .sort(\n    (a, b) =>\n      b.totalValor - a.totalValor\n  );\n\nconst maisVendidoUnidades =\n  rankingUnidades[0] || null;\n\nconst menosVendidoUnidades =\n  rankingUnidades.length\n    ? rankingUnidades[rankingUnidades.length - 1]\n    : null;\n\nconst maiorFaturamento =\n  rankingValor[0] || null;\n\nconst menorFaturamento =\n  rankingValor.length\n    ? rankingValor[rankingValor.length - 1]\n    : null;\n\n// =====================================================\n// VENDAS POR DIA\n// =====================================================\n\nconst diasMap = {};\n\nfor (const venda of vendas) {\n\n  if (!diasMap[venda.data]) {\n\n    diasMap[venda.data] = {\n      data: venda.data,\n      quantidadeVendas: 0,\n      totalUnidades: 0,\n      totalValor: 0\n    };\n  }\n\n  diasMap[venda.data].quantidadeVendas++;\n\n  diasMap[venda.data].totalUnidades +=\n    venda.quantidade;\n\n  diasMap[venda.data].totalValor +=\n    venda.valorTotal;\n}\n\nconst vendasPorDia =\n  Object.values(diasMap)\n    .sort(\n      (a, b) =>\n        a.data.localeCompare(b.data)\n    );\n\n// =====================================================\n// VALIDAÇÕES\n// =====================================================\n\nconst erros = [];\nconst alertas = [];\n\nif (!ehRelatorioVendas) {\n\n  erros.push(\n    'O arquivo enviado não foi identificado como Relatório de Vendas.'\n  );\n}\n\nif (vendas.length === 0) {\n\n  erros.push(\n    'Nenhuma venda válida foi encontrada no arquivo.'\n  );\n}\n\nif (!mesFormulario) {\n\n  erros.push(\n    `Mês informado no formulário é inválido: ${form.MES}`\n  );\n}\n\nif (!/^\\d{4}$/.test(anoFormularioTexto)) {\n\n  erros.push(\n    `Ano informado no formulário é inválido: ${form.ANO}`\n  );\n}\n\n// =====================================================\n// VALIDA TODAS AS DATAS DAS VENDAS\n// =====================================================\n\nif (\n  mesFormulario &&\n  /^\\d{4}$/.test(anoFormularioTexto)\n) {\n\n  const competenciasDiferentes =\n    new Set();\n\n  for (const venda of vendas) {\n\n    const competencia =\n      competenciaData(venda.dataOriginal);\n\n    if (\n      competencia.mes !== mesFormulario ||\n      competencia.ano !== anoFormulario\n    ) {\n\n      competenciasDiferentes.add(\n        `${competencia.mes}/${competencia.ano}`\n      );\n    }\n  }\n\n  if (competenciasDiferentes.size > 0) {\n\n    erros.push(\n      `A competência informada (${form.MES}/${form.ANO}) não corresponde às datas encontradas no relatório.`\n    );\n  }\n}\n\n// =====================================================\n// CONFERE TOTAL COM ERP\n// =====================================================\n\nif (totalInformadoERP !== null) {\n\n  const diferenca =\n    Math.abs(\n      totalValor - totalInformadoERP\n    );\n\n  if (diferenca > 0.05) {\n\n    alertas.push(\n      `O total calculado pelo parser (${totalValor.toFixed(2)}) não corresponde ao total informado pelo ERP (${totalInformadoERP.toFixed(2)}).`\n    );\n  }\n\n} else if (ehRelatorioVendas) {\n\n  alertas.push(\n    'Não foi possível localizar o Total Geral informado pelo ERP.'\n  );\n}\n\n// =====================================================\n// STATUS FINAL\n// =====================================================\n\nlet status = 'OK';\n\nif (erros.length > 0) {\n  status = 'ERRO';\n} else if (alertas.length > 0) {\n  status = 'ALERTA';\n}\n\nconst parserOk =\n  status !== 'ERRO';\n\n// =====================================================\n// SAÍDA\n// =====================================================\n\nreturn [{\n  json: {\n\n    parserOk,\n    status,\n\n    modulo: 'VENDAS',\n\n    competencia: {\n      mes: mesFormularioTexto,\n      numeroMes: mesFormulario,\n      ano: anoFormulario,\n\n      dataInicial,\n      dataFinal\n    },\n\n    validacao: {\n      totalLinhasLidas: linhas.length,\n      totalVendasEncontradas: vendas.length,\n\n      totalInformadoERP,\n      totalCalculado: totalValor,\n\n      diferencaTotal:\n        totalInformadoERP !== null\n          ? Math.abs(\n              totalValor - totalInformadoERP\n            )\n          : null,\n\n      alertas,\n      erros\n    },\n\n    resumo: {\n      totalProdutos: produtos.length,\n      totalVendas: vendas.length,\n      totalPedidos: pedidos.length,\n      totalClientes: clientesUnicos.size,\n\n      totalUnidades,\n      totalLiquido,\n      totalValor,\n\n      ticketMedio:\n        pedidos.length > 0\n          ? totalValor / pedidos.length\n          : 0,\n\n      maisVendidoUnidades,\n      menosVendidoUnidades,\n\n      maiorFaturamento,\n      menorFaturamento\n    },\n\n    produtos,\n    vendas,\n    vendasPorDia,\n\n    rankingUnidades,\n    rankingValor\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        256
+      ],
+      "id": "36ca6b8d-ae60-4a51-bbb7-e595ad573cce",
+      "name": "PARSER - VENDAS"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ String($json.status).trim().toUpperCase() }}",
+                    "rightValue": "OK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2fe0d63c-53f8-4392-8a5e-f8f417e1c782"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Output 0"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e8cc4069-1642-4784-b1cd-c2dbd58cdd34",
+                    "leftValue": "={{ String($json.status).trim().toUpperCase() }}",
+                    "rightValue": "ALERTA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Output 1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "eadcb2de-b15d-426f-8cb0-37504f979e2f",
+                    "leftValue": "={{ String($json.status).trim().toUpperCase() }}",
+                    "rightValue": "ERRO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Output 2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        -16
+      ],
+      "id": "3915b60a-21e0-4c65-b2a6-6d430aac3ae4",
+      "name": "Switch - Validação do PARSER"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst dados = item.json;\n\n// Dados originais escolhidos no formulário\nconst form = $('Envio de Relatório ERP').first().json;\n\n// Nome do arquivo enviado\nconst formNode = $('Envio de Relatório ERP').first();\n\nconst nomeArquivo =\n  formNode.binary?.RELATORIO_ERP?.fileName ||\n  'Arquivo não identificado';\n\n// -----------------------------------------------------\n// INFORMAÇÕES DO PARSER\n// -----------------------------------------------------\n\nconst modulo =\n  dados.modulo ||\n  form.TIPO_MODULO ||\n  'NÃO IDENTIFICADO';\n\nconst status =\n  dados.status ||\n  'ERRO';\n\nconst erros =\n  dados.validacao?.erros ||\n  dados.erros ||\n  [];\n\nconst alertas =\n  dados.validacao?.alertas ||\n  dados.alertas ||\n  [];\n\nconst totalLinhas =\n  dados.validacao?.totalLinhasLidas ??\n  'Não informado';\n\nconst registrosEncontrados =\n  dados.validacao?.totalLancamentosEncontrados ??\n  dados.validacao?.totalRegistrosEncontrados ??\n  0;\n\n// -----------------------------------------------------\n// DATA/HORA\n// -----------------------------------------------------\n\nconst agora = new Date();\n\nconst dataHora = agora.toLocaleString('pt-BR', {\n  timeZone: 'America/Sao_Paulo'\n});\n\n// -----------------------------------------------------\n// MONTA LOG\n// -----------------------------------------------------\n\nlet log = '';\n\nlog += 'PUBLIC DEMO\\n';\nlog += 'CENTRAL DE RELATÓRIOS - LOG DE ERRO\\n';\nlog += '============================================================\\n\\n';\n\nlog += `Data/Hora: ${dataHora}\\n`;\nlog += `Módulo selecionado: ${modulo}\\n`;\nlog += `Mês informado: ${form.MES || 'Não informado'}\\n`;\nlog += `Ano informado: ${form.ANO || 'Não informado'}\\n`;\nlog += `Arquivo enviado: ${nomeArquivo}\\n`;\nlog += `Status: ${status}\\n\\n`;\n\nlog += '------------------------------------------------------------\\n';\nlog += 'VALIDAÇÃO DO PARSER\\n';\nlog += '------------------------------------------------------------\\n';\n\nlog += `Linhas analisadas: ${totalLinhas}\\n`;\nlog += `Registros encontrados: ${registrosEncontrados}\\n\\n`;\n\nif (erros.length > 0) {\n\n  log += 'ERROS ENCONTRADOS:\\n';\n\n  erros.forEach((erro, index) => {\n    log += `${index + 1}. ${erro}\\n`;\n  });\n\n} else {\n\n  log += 'ERRO:\\n';\n  log += 'O processamento foi interrompido, porém o parser não retornou uma descrição detalhada.\\n';\n}\n\nif (alertas.length > 0) {\n\n  log += '\\n------------------------------------------------------------\\n';\n  log += 'ALERTAS ADICIONAIS\\n';\n  log += '------------------------------------------------------------\\n';\n\n  alertas.forEach((alerta, index) => {\n    log += `${index + 1}. ${alerta}\\n`;\n  });\n}\n\nlog += '\\n============================================================\\n';\nlog += 'O relatório não foi gerado.\\n';\nlog += 'Verifique o arquivo enviado e tente novamente.\\n';\nlog += '============================================================\\n';\n\nreturn [{\n  json: {\n    status: 'ERRO',\n    modulo,\n    nomeArquivo,\n    log\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        192
+      ],
+      "id": "71b54ed0-7466-47a5-b9ec-51a5032f47f2",
+      "name": "Preparar LOG DE ERRO"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst texto = item.json.log;\n\nif (!texto) {\n  throw new Error('Não foi encontrado conteúdo para gerar o LOG.');\n}\n\nconst buffer = Buffer.from('\\uFEFF' + texto, 'utf8');\n\nreturn [{\n  json: item.json,\n\n  binary: {\n    data: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/plain',\n      fileName: `LOG_ERRO_${item.json.modulo || 'RELATORIO'}.txt`,\n      fileExtension: 'txt'\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        352
+      ],
+      "id": "67df0f1a-38bb-4c0a-aa44-5235529f391c",
+      "name": "LOG_ERRO_MODULO.txt"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "returnBinary",
+        "completionTitle": "Arquivo com erro",
+        "completionMessage": "Abra o arquivo de Log para verificar o erro!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        1952,
+        512
+      ],
+      "id": "9ba50188-6276-4954-9752-2d463717c0be",
+      "name": "Form"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Envio de Relatório ERP').first().json.TIPO_SAIDA }}",
+                    "rightValue": "Relatório Bruto → Detalhado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1995a4eb-4b07-4176-a3ca-982325edfd69"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BRUTO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a90dbe3b-ecbe-46de-8f25-33476c8c83c7",
+                    "leftValue": "={{ $('Envio de Relatório ERP').first().json.TIPO_SAIDA }}",
+                    "rightValue": "Ambos Relatórios",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "AMBOS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "317cf621-8db3-40f9-8409-120e0c208b3c",
+                    "leftValue": "={{ $('Envio de Relatório ERP').first().json.TIPO_SAIDA }}",
+                    "rightValue": "Relatório Executivo → Indicadores e Resumido",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "EXECUTIVO"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1744,
+        -32
+      ],
+      "id": "4505e3c4-41bd-4879-b317-b3d5914ac4e3",
+      "name": "Switch - TIPO DE SAÍDA"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst dados = $input.first().json;\nconst form = $('Envio de Relatório ERP').first().json;\n\nif (!dados || !dados.modulo) {\n  throw new Error('O gerador recebeu dados sem o campo \"modulo\".');\n}\n\nif (String(dados.status || '').toUpperCase() === 'ERRO') {\n  throw new Error('O gerador de relatório não deve receber itens com status ERRO.');\n}\n\nconst modulo = String(dados.modulo).trim().toUpperCase();\nconst LOGO_SRC = ''; // Public version intentionally omits private company branding.\n\nconst CORES = {\n  verde: '#0b6b3a',\n  verdeEscuro: '#214d31',\n  verdeClaro: '#eaf4ed',\n  amarelo: '#d8df66',\n  amareloClaro: '#f7f7cf',\n  texto: '#26332b',\n  cinza: '#66736b',\n  borda: '#d7dfd9',\n  fundo: '#f6f8f6',\n  branco: '#ffffff',\n  vermelho: '#a83232',\n  alerta: '#8a6500',\n};\n\nfunction esc(v) {\n  return String(v ?? '')\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace(/'/g, '&#039;');\n}\n\nfunction num(v, casas = 0) {\n  const n = Number(v || 0);\n  return n.toLocaleString('pt-BR', {\n    minimumFractionDigits: casas,\n    maximumFractionDigits: casas,\n  });\n}\n\nfunction moeda(v) {\n  return Number(v || 0).toLocaleString('pt-BR', {\n    style: 'currency',\n    currency: 'BRL',\n  });\n}\n\nfunction dataBR(valor) {\n  if (!valor) return '-';\n  const s = String(valor);\n  const iso = s.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);\n  if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;\n  const br = s.match(/^(\\d{2})\\/(\\d{2})\\/(\\d{4})/);\n  if (br) return `${br[1]}/${br[2]}/${br[3]}`;\n  return s;\n}\n\n\nfunction juntarDocumentos(documentos) {\n  const docs = [...new Set((documentos || []).filter(Boolean).map(v => String(v).trim()))];\n\n  if (!docs.length) return '-';\n  if (docs.length === 1) return docs[0];\n  if (docs.length === 2) return `${docs[0]} e ${docs[1]}`;\n\n  return `${docs.slice(0, -1).join(', ')} e ${docs[docs.length - 1]}`;\n}\n\nfunction consolidarProducaoPorDiaProduto(ordens) {\n  const mapa = new Map();\n\n  for (const ordem of ordens || []) {\n    const data = ordem.dataEntrada || 'SEM_DATA';\n    const codigo = ordem.codigoProduto ?? '';\n    const produto = ordem.produto || 'Produto não identificado';\n    const chaveProduto = codigo !== '' ? String(codigo) : produto;\n    const chave = `${data}|||${chaveProduto}`;\n\n    if (!mapa.has(chave)) {\n      mapa.set(chave, {\n        dataEntrada: data,\n        codigoProduto: codigo,\n        produto,\n        documentos: [],\n        totalOrdens: 0,\n        totalUnidades: 0,\n        valorTotal: 0,\n      });\n    }\n\n    const grupo = mapa.get(chave);\n\n    if (ordem.documento != null && String(ordem.documento).trim() !== '') {\n      grupo.documentos.push(String(ordem.documento).trim());\n    }\n\n    grupo.totalOrdens += 1;\n    grupo.totalUnidades += Number(ordem.quantidadeProduzida || 0);\n    grupo.valorTotal += Number(ordem.valorTotal || 0);\n  }\n\n  return [...mapa.values()]\n    .map(g => ({\n      ...g,\n      documentos: [...new Set(g.documentos)],\n      documentosTexto: juntarDocumentos(g.documentos),\n    }))\n    .sort((a, b) => {\n      const dataCmp = String(a.dataEntrada).localeCompare(String(b.dataEntrada));\n      if (dataCmp !== 0) return dataCmp;\n      return String(a.produto).localeCompare(String(b.produto), 'pt-BR');\n    });\n}\n\nfunction textoModulo() {\n  if (modulo === 'PRODUCAO') return 'Produção';\n  if (modulo === 'VENDAS') return 'Vendas';\n  if (modulo === 'COMPRAS') return 'Compras';\n  return modulo;\n}\n\nfunction slug(v) {\n  return String(v || '')\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/[^a-zA-Z0-9]+/g, '_')\n    .replace(/^_+|_+$/g, '');\n}\n\nfunction periodoRelatorio() {\n  if (modulo === 'PRODUCAO') {\n    const ini = dados.competencia?.primeiraProducao;\n    const fim = dados.competencia?.ultimaProducao;\n    if (ini && fim) return `Período analisado: ${dataBR(ini)} a ${dataBR(fim)}`;\n  }\n\n  if (modulo === 'VENDAS') {\n    const ini = dados.competencia?.dataInicial;\n    const fim = dados.competencia?.dataFinal;\n    if (ini && fim) return `Período analisado: ${dataBR(ini)} a ${dataBR(fim)}`;\n  }\n\n  if (modulo === 'COMPRAS') {\n    const mes = form.MES || dados.competencia?.mes;\n    const ano = form.ANO || dados.competencia?.ano;\n    if (mes || ano) return `Competência informada: ${esc(mes || '')}${mes && ano ? ' / ' : ''}${esc(ano || '')}`;\n  }\n\n  const mes = form.MES || dados.competencia?.mes;\n  const ano = form.ANO || dados.competencia?.ano;\n  return mes || ano ? `Competência: ${esc(mes || '')} ${esc(ano || '')}` : '';\n}\n\nfunction blocoAlertas() {\n  const alertas = dados.validacao?.alertas || [];\n  if (!alertas.length) return '';\n  return `\n    <div class=\"alerta\">\n      <strong>Atenção:</strong>\n      ${alertas.map(a => `<div>• ${esc(a)}</div>`).join('')}\n    </div>`;\n}\n\nfunction card(label, valor, detalhe = '') {\n  return `\n    <div class=\"card\">\n      <div class=\"card-label\">${esc(label)}</div>\n      <div class=\"card-value\">${valor}</div>\n      ${detalhe ? `<div class=\"card-detail\">${esc(detalhe)}</div>` : ''}\n    </div>`;\n}\n\nfunction destaque(titulo, nome, valor = '') {\n  return `\n    <div class=\"destaque\">\n      <div class=\"destaque-titulo\">${esc(titulo)}</div>\n      <div class=\"destaque-nome\">${esc(nome || '-')}</div>\n      ${valor ? `<div class=\"destaque-valor\">${valor}</div>` : ''}\n    </div>`;\n}\n\nfunction documentoHtml(titulo, subtitulo, conteudo) {\n  return `<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>${esc(titulo)}</title>\n<style>\n  @page {\n    size: A4;\n    margin: 14mm 12mm 16mm 12mm;\n  }\n\n  * { box-sizing: border-box; }\n\n  html, body {\n    margin: 0;\n    padding: 0;\n    font-family: Arial, Tahoma, sans-serif;\n    color: ${CORES.texto};\n    background: #fff;\n    font-size: 10.2pt;\n    line-height: 1.35;\n  }\n\n  .letterhead-header {\n    position: relative;\n    width: 100%;\n    min-height: 24mm;\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;\n    margin: 0 0 6mm 0;\n    padding: 0 0 3.5mm 0;\n    border-bottom: 1px solid #d7dfd9;\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  .letterhead-header img {\n    width: 36mm;\n    height: auto;\n    max-height: 22mm;\n    object-fit: contain;\n    object-position: left center;\n    display: block;\n  }\n\n  .letterhead-footer {\n    position: relative;\n    width: 100%;\n    margin-top: 9mm;\n    padding-top: 2.5mm;\n    color: #416235;\n    text-align: center;\n    font-size: 8pt;\n    line-height: 1.25;\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  .letterhead-footer .linha {\n    border-top: .55pt solid #607b52;\n    margin-bottom: 2.2mm;\n  }\n\n  .letterhead-footer .row + .row { margin-top: 1.2mm; }\n  .letterhead-footer .sep { padding: 0 2.5mm; font-weight: 700; }\n\n  main {\n    width: 100%;\n    display: block;\n  }\n\n  .report-head {\n    border-bottom: 2.2pt solid ${CORES.verde};\n    padding-bottom: 4mm;\n    margin-bottom: 5mm;\n  }\n\n  .report-kicker {\n    color: ${CORES.verde};\n    font-weight: 700;\n    text-transform: uppercase;\n    letter-spacing: .8px;\n    font-size: 8.5pt;\n  }\n\n  h1 {\n    margin: 1mm 0 1.5mm;\n    font-size: 20pt;\n    line-height: 1.08;\n    color: ${CORES.verdeEscuro};\n  }\n\n  .subtitle {\n    color: ${CORES.cinza};\n    font-size: 9.5pt;\n  }\n\n  .status {\n    display: inline-block;\n    margin-top: 2mm;\n    padding: 1.1mm 2.7mm;\n    border-radius: 999px;\n    background: ${dados.status === 'ALERTA' ? '#fff4ce' : CORES.verdeClaro};\n    color: ${dados.status === 'ALERTA' ? CORES.alerta : CORES.verdeEscuro};\n    font-size: 8.2pt;\n    font-weight: 700;\n  }\n\n  .alerta {\n    margin: 0 0 5mm;\n    padding: 3mm 4mm;\n    border-left: 3pt solid #d49a00;\n    background: #fff9e5;\n    color: #6b5200;\n    font-size: 9pt;\n  }\n\n  .cards {\n    display: grid;\n    grid-template-columns: repeat(4, 1fr);\n    gap: 3mm;\n    margin-bottom: 5mm;\n  }\n\n  .cards.cinco { grid-template-columns: repeat(5, 1fr); }\n\n  .card {\n    border: 1px solid ${CORES.borda};\n    border-top: 3px solid ${CORES.verde};\n    border-radius: 5px;\n    padding: 3.5mm;\n    min-height: 21mm;\n    background: #fff;\n  }\n\n  .card-label {\n    color: ${CORES.cinza};\n    text-transform: uppercase;\n    font-size: 7.5pt;\n    font-weight: 700;\n    letter-spacing: .3px;\n  }\n\n  .card-value {\n    margin-top: 1.2mm;\n    color: ${CORES.verdeEscuro};\n    font-size: 16pt;\n    font-weight: 800;\n    line-height: 1.05;\n  }\n\n  .card-detail {\n    margin-top: 1mm;\n    color: ${CORES.cinza};\n    font-size: 7.6pt;\n  }\n\n  .destaques {\n    display: grid;\n    grid-template-columns: 1fr 1fr;\n    gap: 3mm;\n    margin-bottom: 6mm;\n  }\n\n  .destaque {\n    border: 1px solid ${CORES.borda};\n    background: ${CORES.fundo};\n    padding: 3.4mm;\n    border-radius: 5px;\n  }\n\n  .destaque-titulo {\n    color: ${CORES.verde};\n    text-transform: uppercase;\n    font-size: 7.6pt;\n    font-weight: 800;\n  }\n\n  .destaque-nome {\n    margin-top: 1mm;\n    font-weight: 700;\n    color: ${CORES.texto};\n  }\n\n  .destaque-valor {\n    margin-top: .8mm;\n    color: ${CORES.cinza};\n    font-size: 9pt;\n  }\n\n  h2 {\n    color: ${CORES.verdeEscuro};\n    font-size: 13pt;\n    margin: 6mm 0 2.5mm;\n    padding-bottom: 1.5mm;\n    border-bottom: 1px solid ${CORES.borda};\n    break-after: avoid;\n  }\n\n  h3 {\n    color: ${CORES.verdeEscuro};\n    font-size: 10.5pt;\n    margin: 4.5mm 0 2mm;\n    break-after: avoid;\n  }\n\n  table {\n    width: 100%;\n    border-collapse: collapse;\n    margin-bottom: 4mm;\n  }\n\n  thead {\n    display: table-header-group;\n  }\n\n  tfoot {\n    display: table-row-group;\n  }\n\n  table {\n    page-break-inside: auto;\n    break-inside: auto;\n  }\n\n  tbody {\n    page-break-inside: auto;\n    break-inside: auto;\n  }\n\n  th {\n    text-align: left;\n    background: ${CORES.verde};\n    color: white;\n    padding: 2.2mm 2mm;\n    font-size: 8pt;\n    font-weight: 700;\n  }\n\n  td {\n    padding: 2mm;\n    border-bottom: 1px solid #e6ebe7;\n    vertical-align: top;\n    font-size: 8.4pt;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n  tbody tr:nth-child(even) { background: #fafcfb; }\n\n  .right { text-align: right; white-space: nowrap; }\n  .center { text-align: center; }\n  .muted { color: ${CORES.cinza}; }\n  .strong { font-weight: 700; }\n\n  .total-row td {\n    background: ${CORES.amareloClaro};\n    color: ${CORES.verdeEscuro};\n    font-weight: 800;\n    border-top: 1.2pt solid ${CORES.amarelo};\n  }\n\n  .product-block {\n    margin-bottom: 6mm;\n  }\n\n  .product-title {\n    display: flex;\n    align-items: flex-end;\n    justify-content: space-between;\n    gap: 5mm;\n    padding: 2.5mm 3mm;\n    background: ${CORES.verdeClaro};\n    border-left: 3pt solid ${CORES.verde};\n    break-after: avoid;\n  }\n\n  .product-title .name {\n    font-weight: 800;\n    color: ${CORES.verdeEscuro};\n  }\n\n  .product-title .code {\n    color: ${CORES.cinza};\n    font-size: 8pt;\n  }\n\n  .small-note {\n    color: ${CORES.cinza};\n    font-size: 8pt;\n    margin-top: 2mm;\n  }\n\n  .chart-grid {\n    display: grid;\n    grid-template-columns: 1fr 1fr;\n    gap: 5mm;\n    margin-top: 4mm;\n    margin-bottom: 5mm;\n  }\n\n  .chart-card {\n    border: 1px solid ${CORES.borda};\n    border-radius: 6px;\n    padding: 4mm;\n    background: #fff;\n    break-inside: avoid;\n  }\n\n  .chart-title {\n    color: ${CORES.verdeEscuro};\n    font-size: 10.5pt;\n    font-weight: 800;\n    margin-bottom: 3mm;\n  }\n\n  .pie-wrap {\n    display: grid;\n    grid-template-columns: 40mm 1fr;\n    gap: 5mm;\n    align-items: center;\n  }\n\n  .pie {\n    width: 38mm;\n    height: 38mm;\n    border-radius: 50%;\n    border: 1px solid ${CORES.borda};\n  }\n\n  .legend-item {\n    display: grid;\n    grid-template-columns: 3mm 1fr auto;\n    align-items: center;\n    gap: 2mm;\n    margin: 1.25mm 0;\n    font-size: 7.8pt;\n  }\n\n  .legend-dot {\n    width: 3mm;\n    height: 3mm;\n    border-radius: 1px;\n  }\n\n  .bar-row {\n    display: grid;\n    grid-template-columns: 34mm 1fr 23mm;\n    gap: 2.2mm;\n    align-items: center;\n    margin: 2.2mm 0;\n    font-size: 7.7pt;\n  }\n\n  .bar-label {\n    overflow: hidden;\n    white-space: nowrap;\n    text-overflow: ellipsis;\n  }\n\n  .bar-track {\n    height: 4.2mm;\n    background: #eef2ef;\n    border-radius: 2mm;\n    overflow: hidden;\n  }\n\n  .bar-fill {\n    height: 100%;\n    background: linear-gradient(90deg, ${CORES.verde}, #67a768);\n    border-radius: 2mm;\n  }\n\n  .bar-value {\n    text-align: right;\n    white-space: nowrap;\n    font-weight: 700;\n    color: ${CORES.verdeEscuro};\n  }\n\n  .rank-grid {\n    display: grid;\n    grid-template-columns: 1fr 1fr;\n    gap: 5mm;\n  }\n\n  .no-data {\n    border: 1px dashed ${CORES.borda};\n    background: ${CORES.fundo};\n    color: ${CORES.cinza};\n    padding: 5mm;\n    text-align: center;\n  }\n</style>\n</head>\n<body>\n  <div class=\"letterhead-header\">\n    <div style=\"font-weight:800;font-size:18px;color:#214c37;\">ERP REPORT AUTOMATION HUB</div>\n  </div>\n\n  <main>\n    <section class=\"report-head\">\n      <div class=\"report-kicker\">ERP Report Automation Hub</div>\n      <h1>${esc(titulo)}</h1>\n      <div class=\"subtitle\">${subtitulo}</div>\n      <div class=\"status\">STATUS: ${esc(dados.status || 'OK')}</div>\n    </section>\n\n    ${blocoAlertas()}\n    ${conteudo}\n  </main>\n\n  <div class=\"letterhead-footer\">\n    <div class=\"linha\"></div>\n    <div class=\"row\">Public portfolio version <span class=\"sep\">▪</span> Synthetic examples only</div>\n    <div class=\"row\">Public workflow <span class=\"sep\">▪</span> No company contact information included</div>\n  </div>\n</body>\n</html>`;\n}\n\nlet conteudo = '';\nlet nomeArquivoPdf = '';\nlet nomeArquivoExcel = '';\nlet nomeArquivoZip = '';\nlet linhasExcel = [];\n\n// =====================================================\n// 1) PRODUÇÃO\n// =====================================================\nif (modulo === 'PRODUCAO') {\n  const r = dados.resumo || {};\n  const mais = r.maisProduzido || {};\n  const menos = r.menosProduzido || {};\n  const dias = [...(dados.producaoPorDia || [])].sort((a, b) => String(a.data).localeCompare(String(b.data)));\n  const ordens = [...(dados.ordens || [])].sort((a, b) => String(a.dataEntrada || '').localeCompare(String(b.dataEntrada || '')));\n\n  // Consolida ordens repetidas do MESMO PRODUTO no MESMO DIA.\n  // Ex.: OP 700 (Product A - 1000 un.) + OP 702 (Product A - 1000 un.)\n  // vira uma única linha: OPs 700 e 702 / Product A / 2000 un.\n  const producaoAgrupada = consolidarProducaoPorDiaProduto(ordens);\n\n  const gruposPorDia = producaoAgrupada.reduce((acc, grupo) => {\n    const data = grupo.dataEntrada || 'SEM_DATA';\n    if (!acc[data]) acc[data] = [];\n    acc[data].push(grupo);\n    return acc;\n  }, {});\n\n  conteudo += `\n    <div class=\"cards\">\n      ${card('Unidades produzidas', num(r.totalUnidades), 'No período analisado')}\n      ${card('Dias com produção', num(r.totalDiasProducao), 'Dias com entrada de produção')}\n      ${card('Ordens', num(r.totalOrdens), 'Ordens de produção identificadas')}\n      ${card('Produtos', num(r.totalProdutos), 'Produtos industrializados')}\n    </div>\n\n    <div class=\"destaques\">\n      ${destaque('Maior produção', mais.produto, mais.totalUnidades != null ? `${num(mais.totalUnidades)} unidades` : '')}\n      ${destaque('Menor produção', menos.produto, menos.totalUnidades != null ? `${num(menos.totalUnidades)} unidades` : '')}\n    </div>\n\n    <h2>Produção por dia</h2>\n    ${dias.length ? `\n      <table>\n        <thead>\n          <tr>\n            <th>Data</th>\n            <th class=\"right\">Ordens</th>\n            <th class=\"right\">Unidades produzidas</th>\n            <th class=\"right\">Valor total</th>\n          </tr>\n        </thead>\n        <tbody>\n          ${dias.map(d => `\n            <tr>\n              <td>${dataBR(d.data)}</td>\n              <td class=\"right\">${num(d.totalOrdens)}</td>\n              <td class=\"right strong\">${num(d.totalUnidades)}</td>\n              <td class=\"right\">${moeda(d.valorTotal)}</td>\n            </tr>`).join('')}\n        </tbody>\n      </table>` : '<div class=\"no-data\">Nenhuma produção por dia foi encontrada.</div>'}\n\n    <h2>Produção consolidada por dia e produto</h2>\n    <div class=\"small-note\">Ordens do mesmo produto no mesmo dia são somadas e apresentadas em uma única linha.</div>\n\n    ${Object.keys(gruposPorDia).length ? Object.entries(gruposPorDia).map(([data, grupos]) => {\n      const totalDiaUnidades = grupos.reduce((s, g) => s + Number(g.totalUnidades || 0), 0);\n      const totalDiaValor = grupos.reduce((s, g) => s + Number(g.valorTotal || 0), 0);\n      const totalDiaOrdens = grupos.reduce((s, g) => s + Number(g.totalOrdens || 0), 0);\n\n      return `\n        <section class=\"product-block\">\n          <div class=\"product-title\">\n            <div>\n              <div class=\"name\">Dia ${dataBR(data)}</div>\n              <div class=\"code\">${num(totalDiaOrdens)} ordem(ns) de produção</div>\n            </div>\n            <div class=\"right\">\n              <div class=\"strong\">${num(totalDiaUnidades)} unidades</div>\n              <div class=\"muted\">${moeda(totalDiaValor)}</div>\n            </div>\n          </div>\n\n          <table>\n            <thead>\n              <tr>\n                <th>Ordem(ns)</th>\n                <th>Produto</th>\n                <th class=\"right\">Qtd. OPs</th>\n                <th class=\"right\">Unidades produzidas</th>\n                <th class=\"right\">Valor total</th>\n              </tr>\n            </thead>\n            <tbody>\n              ${grupos.map(g => `\n                <tr>\n                  <td>${esc(g.documentosTexto)}</td>\n                  <td><span class=\"muted\">${esc(g.codigoProduto || '')}</span> ${esc(g.produto || '-')}</td>\n                  <td class=\"right\">${num(g.totalOrdens)}</td>\n                  <td class=\"right strong\">${num(g.totalUnidades)}</td>\n                  <td class=\"right\">${moeda(g.valorTotal)}</td>\n                </tr>`).join('')}\n            </tbody>\n            <tfoot>\n              <tr class=\"total-row\">\n                <td colspan=\"2\">TOTAL DO DIA</td>\n                <td class=\"right\">${num(totalDiaOrdens)}</td>\n                <td class=\"right\">${num(totalDiaUnidades)}</td>\n                <td class=\"right\">${moeda(totalDiaValor)}</td>\n              </tr>\n            </tfoot>\n          </table>\n        </section>`;\n    }).join('') : '<div class=\"no-data\">Nenhuma ordem de produção foi encontrada.</div>'}\n  `;\n\n  nomeArquivoPdf = `Relatorio_Bruto_Producao_${slug(form.MES || '')}_${slug(form.ANO || '')}.pdf`;\n  nomeArquivoExcel = `Relatorio_Bruto_Producao_${slug(form.MES || '')}_${slug(form.ANO || '')}.xlsx`;\n  nomeArquivoZip = `Relatorio_Bruto_Producao_${slug(form.MES || '')}_${slug(form.ANO || '')}.zip`;\n\n  linhasExcel = producaoAgrupada.map(g => ({\n    'Data': dataBR(g.dataEntrada),\n    'Ordem(ns)': g.documentosTexto,\n    'Código Produto': g.codigoProduto || '',\n    'Produto': g.produto || '',\n    'Qtd. Ordens': g.totalOrdens,\n    'Unidades Produzidas': g.totalUnidades,\n    'Valor Total': Number(g.valorTotal || 0),\n  }));\n}\n\n// =====================================================\n// 2) VENDAS\n// =====================================================\nelse if (modulo === 'VENDAS') {\n  const r = dados.resumo || {};\n  const produtos = [...(dados.produtos || [])].sort((a, b) => String(a.produto || '').localeCompare(String(b.produto || ''), 'pt-BR'));\n  const mais = r.maisVendidoUnidades || {};\n  const menos = r.menosVendidoUnidades || {};\n\n  conteudo += `\n    <div class=\"cards\">\n      ${card('Valor vendido', moeda(r.totalValor), 'Total do período')}\n      ${card('Unidades vendidas', num(r.totalUnidades), 'Soma de todas as saídas')}\n      ${card('Produtos', num(r.totalProdutos), 'Produtos com venda')}\n      ${card('Clientes', num(r.totalClientes), `${num(r.totalPedidos)} pedidos/documentos`)}\n    </div>\n\n    <div class=\"destaques\">\n      ${destaque('Maior volume vendido', mais.produto, mais.totalUnidades != null ? `${num(mais.totalUnidades)} unidades` : '')}\n      ${destaque('Menor volume vendido', menos.produto, menos.totalUnidades != null ? `${num(menos.totalUnidades)} unidades` : '')}\n    </div>\n\n    <h2>Vendas organizadas por produto</h2>\n    <div class=\"small-note\">Cada produto é apresentado com as vendas por data e o total consolidado do período.</div>\n\n    ${produtos.length ? produtos.map(p => {\n      const vendas = [...(p.vendas || [])].sort((a, b) => String(a.data || '').localeCompare(String(b.data || '')));\n      return `\n        <section class=\"product-block\">\n          <div class=\"product-title\">\n            <div>\n              <div class=\"name\">${esc(p.produto || '-')}</div>\n              <div class=\"code\">Código: ${esc(p.codigoProduto || '-')}</div>\n            </div>\n            <div class=\"right\">\n              <div class=\"strong\">${num(p.totalUnidades)} unidades</div>\n              <div class=\"muted\">${moeda(p.totalValor)}</div>\n            </div>\n          </div>\n\n          <table>\n            <thead>\n              <tr>\n                <th>Data</th>\n                <th>Documento</th>\n                <th>Cliente</th>\n                <th class=\"right\">Quantidade</th>\n                <th class=\"right\">Vlr. unitário</th>\n                <th class=\"right\">Valor total</th>\n              </tr>\n            </thead>\n            <tbody>\n              ${vendas.map(v => `\n                <tr>\n                  <td>${dataBR(v.data || v.dataOriginal)}</td>\n                  <td>${esc(v.documento || '-')}</td>\n                  <td>${esc(v.cliente || '-')}</td>\n                  <td class=\"right strong\">${num(v.quantidade)}</td>\n                  <td class=\"right\">${moeda(v.valorUnitario)}</td>\n                  <td class=\"right\">${moeda(v.valorTotal)}</td>\n                </tr>`).join('')}\n            </tbody>\n            <tfoot>\n              <tr class=\"total-row\">\n                <td colspan=\"3\">TOTAL DO PRODUTO</td>\n                <td class=\"right\">${num(p.totalUnidades)}</td>\n                <td></td>\n                <td class=\"right\">${moeda(p.totalValor)}</td>\n              </tr>\n            </tfoot>\n          </table>\n        </section>`;\n    }).join('') : '<div class=\"no-data\">Nenhum produto com vendas foi encontrado.</div>'}\n  `;\n\n  nomeArquivoPdf = `Relatorio_Bruto_Vendas_${slug(form.MES || '')}_${slug(form.ANO || '')}.pdf`;\n  nomeArquivoExcel = `Relatorio_Bruto_Vendas_${slug(form.MES || '')}_${slug(form.ANO || '')}.xlsx`;\n  nomeArquivoZip = `Relatorio_Bruto_Vendas_${slug(form.MES || '')}_${slug(form.ANO || '')}.zip`;\n\n  linhasExcel = produtos.flatMap(p => (p.vendas || []).map(v => ({\n    'Data': dataBR(v.data || v.dataOriginal),\n    'Código Produto': p.codigoProduto || v.codigoProduto || '',\n    'Produto': p.produto || v.produto || '',\n    'Documento': v.documento || '',\n    'Código Cliente': v.codigoCliente || '',\n    'Cliente': v.cliente || '',\n    'Quantidade': Number(v.quantidade || 0),\n    'Unidade': v.unidade || '',\n    'Valor Unitário': Number(v.valorUnitario || 0),\n    'Valor Total': Number(v.valorTotal || 0),\n  })));\n}\n\n// =====================================================\n// 3) COMPRAS\n// =====================================================\nelse if (modulo === 'COMPRAS') {\n  const r = dados.resumo || {};\n  const compras = dados.compras || [];\n  const ranking = dados.rankingFornecedores || dados.fornecedores || [];\n  const maiorFornecedor = r.maiorFornecedor || {};\n  const menorFornecedor = r.menorFornecedor || {};\n\n  conteudo += `\n    <div class=\"cards\">\n      ${card('Total gasto', moeda(r.totalGasto), 'Compras e despesas')}\n      ${card('Lançamentos', num(r.totalLancamentos), 'Registros encontrados')}\n      ${card('Fornecedores', num(r.totalFornecedores), 'Fornecedores distintos')}\n      ${card('Média por lançamento', moeda(r.totalLancamentos ? r.totalGasto / r.totalLancamentos : 0), 'Valor médio')}\n    </div>\n\n    <div class=\"destaques\">\n      ${destaque('Maior gasto por fornecedor', maiorFornecedor.fornecedor, maiorFornecedor.valorTotal != null ? moeda(maiorFornecedor.valorTotal) : '')}\n      ${destaque('Menor gasto por fornecedor', menorFornecedor.fornecedor, menorFornecedor.valorTotal != null ? moeda(menorFornecedor.valorTotal) : '')}\n    </div>\n\n    <h2>Compras e despesas</h2>\n    ${compras.length ? `\n      <table>\n        <thead>\n          <tr>\n            <th>Documento / Despesa</th>\n            <th>Fornecedor</th>\n            <th class=\"right\">Valor líquido</th>\n            <th class=\"right\">%</th>\n          </tr>\n        </thead>\n        <tbody>\n          ${compras.map(c => `\n            <tr>\n              <td>${esc(c.documento || '-')}</td>\n              <td><span class=\"muted\">${esc(c.codigoFornecedor || '')}</span> ${esc(c.fornecedor || '-')}</td>\n              <td class=\"right strong\">${moeda(c.valorLiquido)}</td>\n              <td class=\"right\">${num(c.percentual, 2)}%</td>\n            </tr>`).join('')}\n        </tbody>\n        <tfoot>\n          <tr class=\"total-row\">\n            <td colspan=\"2\">TOTAL DE COMPRAS / DESPESAS</td>\n            <td class=\"right\">${moeda(r.totalGasto)}</td>\n            <td class=\"right\">100,00%</td>\n          </tr>\n        </tfoot>\n      </table>` : '<div class=\"no-data\">Nenhum lançamento de compra/despesa foi encontrado.</div>'}\n\n    <h2>Consolidado por fornecedor</h2>\n    ${ranking.length ? `\n      <table>\n        <thead>\n          <tr>\n            <th>Fornecedor</th>\n            <th class=\"right\">Lançamentos</th>\n            <th class=\"right\">Valor acumulado</th>\n          </tr>\n        </thead>\n        <tbody>\n          ${ranking.map(f => `\n            <tr>\n              <td>${esc(f.fornecedor || '-')}</td>\n              <td class=\"right\">${num(f.quantidadeCompras)}</td>\n              <td class=\"right strong\">${moeda(f.valorTotal)}</td>\n            </tr>`).join('')}\n        </tbody>\n      </table>` : ''}\n  `;\n\n  nomeArquivoPdf = `Relatorio_Bruto_Compras_${slug(form.MES || '')}_${slug(form.ANO || '')}.pdf`;\n  nomeArquivoExcel = `Relatorio_Bruto_Compras_${slug(form.MES || '')}_${slug(form.ANO || '')}.xlsx`;\n  nomeArquivoZip = `Relatorio_Bruto_Compras_${slug(form.MES || '')}_${slug(form.ANO || '')}.zip`;\n\n  linhasExcel = compras.map(c => ({\n    'Documento / Despesa': c.documento || '',\n    'Código Fornecedor': c.codigoFornecedor || '',\n    'Fornecedor': c.fornecedor || '',\n    'Valor Líquido': Number(c.valorLiquido || 0),\n    'Percentual': Number(c.percentual || 0),\n  }));\n}\n\nelse {\n  throw new Error(`Módulo não suportado pelo gerador BRUTO: ${modulo}`);\n}\n\nconst titulo = `Relatório Bruto de ${textoModulo()}`;\nconst subtitulo = periodoRelatorio();\nconst html = documentoHtml(titulo, subtitulo, conteudo);\n\nreturn [{\n  json: {\n    ...dados,\n    tipoRelatorioGerado: 'BRUTO',\n    nomeArquivoPdf,\n    nomeArquivoExcel,\n    nomeArquivoZip,\n    linhasExcel,\n    html,\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        -192
+      ],
+      "id": "4b4303d2-7c49-4855-a568-77c2b70849b0",
+      "name": "GERAR RELATÓRIO BRUTO"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst dados = $input.first().json;\nconst form = $('Envio de Relatório ERP').first().json;\n\nif (!dados || !dados.modulo) {\n  throw new Error('O gerador recebeu dados sem o campo \"modulo\".');\n}\n\nif (String(dados.status || '').toUpperCase() === 'ERRO') {\n  throw new Error('O gerador de relatório não deve receber itens com status ERRO.');\n}\n\nconst modulo = String(dados.modulo).trim().toUpperCase();\nconst LOGO_SRC = ''; // Public version intentionally omits private company branding.\n\nconst CORES = {\n  verde: '#0b6b3a',\n  verdeEscuro: '#214d31',\n  verdeClaro: '#eaf4ed',\n  amarelo: '#d8df66',\n  amareloClaro: '#f7f7cf',\n  texto: '#26332b',\n  cinza: '#66736b',\n  borda: '#d7dfd9',\n  fundo: '#f6f8f6',\n  branco: '#ffffff',\n  vermelho: '#a83232',\n  alerta: '#8a6500',\n};\n\nfunction esc(v) {\n  return String(v ?? '')\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace(/'/g, '&#039;');\n}\n\nfunction num(v, casas = 0) {\n  const n = Number(v || 0);\n  return n.toLocaleString('pt-BR', {\n    minimumFractionDigits: casas,\n    maximumFractionDigits: casas,\n  });\n}\n\nfunction moeda(v) {\n  return Number(v || 0).toLocaleString('pt-BR', {\n    style: 'currency',\n    currency: 'BRL',\n  });\n}\n\nfunction dataBR(valor) {\n  if (!valor) return '-';\n  const s = String(valor);\n  const iso = s.match(/^(\\d{4})-(\\d{2})-(\\d{2})/);\n  if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;\n  const br = s.match(/^(\\d{2})\\/(\\d{2})\\/(\\d{4})/);\n  if (br) return `${br[1]}/${br[2]}/${br[3]}`;\n  return s;\n}\n\nfunction textoModulo() {\n  if (modulo === 'PRODUCAO') return 'Produção';\n  if (modulo === 'VENDAS') return 'Vendas';\n  if (modulo === 'COMPRAS') return 'Compras';\n  return modulo;\n}\n\nfunction slug(v) {\n  return String(v || '')\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '')\n    .replace(/[^a-zA-Z0-9]+/g, '_')\n    .replace(/^_+|_+$/g, '');\n}\n\nfunction periodoRelatorio() {\n  if (modulo === 'PRODUCAO') {\n    const ini = dados.competencia?.primeiraProducao;\n    const fim = dados.competencia?.ultimaProducao;\n    if (ini && fim) return `Período analisado: ${dataBR(ini)} a ${dataBR(fim)}`;\n  }\n\n  if (modulo === 'VENDAS') {\n    const ini = dados.competencia?.dataInicial;\n    const fim = dados.competencia?.dataFinal;\n    if (ini && fim) return `Período analisado: ${dataBR(ini)} a ${dataBR(fim)}`;\n  }\n\n  if (modulo === 'COMPRAS') {\n    const mes = form.MES || dados.competencia?.mes;\n    const ano = form.ANO || dados.competencia?.ano;\n    if (mes || ano) return `Competência informada: ${esc(mes || '')}${mes && ano ? ' / ' : ''}${esc(ano || '')}`;\n  }\n\n  const mes = form.MES || dados.competencia?.mes;\n  const ano = form.ANO || dados.competencia?.ano;\n  return mes || ano ? `Competência: ${esc(mes || '')} ${esc(ano || '')}` : '';\n}\n\nfunction blocoAlertas() {\n  const alertas = dados.validacao?.alertas || [];\n  if (!alertas.length) return '';\n  return `\n    <div class=\"alerta\">\n      <strong>Atenção:</strong>\n      ${alertas.map(a => `<div>• ${esc(a)}</div>`).join('')}\n    </div>`;\n}\n\nfunction card(label, valor, detalhe = '') {\n  return `\n    <div class=\"card\">\n      <div class=\"card-label\">${esc(label)}</div>\n      <div class=\"card-value\">${valor}</div>\n      ${detalhe ? `<div class=\"card-detail\">${esc(detalhe)}</div>` : ''}\n    </div>`;\n}\n\nfunction destaque(titulo, nome, valor = '') {\n  return `\n    <div class=\"destaque\">\n      <div class=\"destaque-titulo\">${esc(titulo)}</div>\n      <div class=\"destaque-nome\">${esc(nome || '-')}</div>\n      ${valor ? `<div class=\"destaque-valor\">${valor}</div>` : ''}\n    </div>`;\n}\n\nfunction documentoHtml(titulo, subtitulo, conteudo) {\n  return `<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>${esc(titulo)}</title>\n<style>\n  @page {\n    size: A4;\n    margin: 12mm 12mm 14mm 12mm;\n  }\n\n  * { box-sizing: border-box; }\n\n  html, body {\n    margin: 0;\n    padding: 0;\n    font-family: Arial, Tahoma, sans-serif;\n    color: ${CORES.texto};\n    background: #fff;\n    font-size: 9.6pt;\n    line-height: 1.32;\n  }\n\n  main {\n    width: 100%;\n    display: block;\n  }\n\n  .report-head {\n    margin: 0 0 5mm;\n    padding: 0 0 4mm;\n    border-bottom: 2.2pt solid ${CORES.verde};\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  .brand-row {\n    display: flex;\n    align-items: center;\n    gap: 5mm;\n    margin-bottom: 3.5mm;\n  }\n\n  .brand-logo {\n    width: 35mm;\n    max-height: 21mm;\n    height: auto;\n    object-fit: contain;\n    object-position: left center;\n    flex: 0 0 auto;\n    display: block;\n  }\n\n  .brand-copy {\n    min-width: 0;\n    flex: 1;\n  }\n\n  .report-kicker {\n    color: ${CORES.verde};\n    font-weight: 800;\n    text-transform: uppercase;\n    letter-spacing: .7px;\n    font-size: 7.8pt;\n    margin-bottom: .8mm;\n  }\n\n  h1 {\n    margin: 0 0 1.2mm;\n    font-size: 19pt;\n    line-height: 1.06;\n    color: ${CORES.verdeEscuro};\n  }\n\n  .subtitle {\n    color: ${CORES.cinza};\n    font-size: 9pt;\n  }\n\n  .status {\n    display: inline-block;\n    margin-top: 1.8mm;\n    padding: 1mm 2.5mm;\n    border-radius: 999px;\n    background: ${dados.status === 'ALERTA' ? '#fff4ce' : CORES.verdeClaro};\n    color: ${dados.status === 'ALERTA' ? CORES.alerta : CORES.verdeEscuro};\n    font-size: 7.7pt;\n    font-weight: 800;\n  }\n\n  .alerta {\n    margin: 0 0 4mm;\n    padding: 3mm 4mm;\n    border-left: 3pt solid #d49a00;\n    background: #fff9e5;\n    color: #6b5200;\n    font-size: 8.5pt;\n    break-inside: avoid;\n  }\n\n  .cards {\n    display: grid;\n    grid-template-columns: repeat(4, 1fr);\n    gap: 2.6mm;\n    margin-bottom: 4mm;\n  }\n\n  .cards.cinco {\n    grid-template-columns: repeat(5, 1fr);\n  }\n\n  .card {\n    border: 1px solid ${CORES.borda};\n    border-top: 2.5px solid ${CORES.verde};\n    border-radius: 5px;\n    padding: 3mm;\n    min-height: 19mm;\n    background: #fff;\n    break-inside: avoid;\n  }\n\n  .card-label {\n    color: ${CORES.cinza};\n    text-transform: uppercase;\n    font-size: 6.8pt;\n    font-weight: 800;\n    letter-spacing: .25px;\n  }\n\n  .card-value {\n    margin-top: 1mm;\n    color: ${CORES.verdeEscuro};\n    font-size: 13.5pt;\n    font-weight: 800;\n    line-height: 1.05;\n    overflow-wrap: anywhere;\n  }\n\n  .card-detail {\n    margin-top: .9mm;\n    color: ${CORES.cinza};\n    font-size: 6.8pt;\n  }\n\n  .destaques {\n    display: grid;\n    grid-template-columns: 1fr 1fr;\n    gap: 2.8mm;\n    margin-bottom: 4.5mm;\n  }\n\n  .destaque {\n    border: 1px solid ${CORES.borda};\n    background: ${CORES.fundo};\n    padding: 3mm;\n    border-radius: 5px;\n    min-height: 20mm;\n    break-inside: avoid;\n  }\n\n  .destaque-titulo {\n    color: ${CORES.verde};\n    text-transform: uppercase;\n    font-size: 6.9pt;\n    font-weight: 800;\n  }\n\n  .destaque-nome {\n    margin-top: 1mm;\n    font-weight: 800;\n    color: ${CORES.texto};\n    font-size: 8.5pt;\n    line-height: 1.25;\n  }\n\n  .destaque-valor {\n    margin-top: .8mm;\n    color: ${CORES.cinza};\n    font-size: 8pt;\n  }\n\n  h2 {\n    color: ${CORES.verdeEscuro};\n    font-size: 11.5pt;\n    margin: 5mm 0 2.2mm;\n    padding-bottom: 1.3mm;\n    border-bottom: 1px solid ${CORES.borda};\n    break-after: avoid;\n    page-break-after: avoid;\n  }\n\n  .chart-grid {\n    display: grid;\n    grid-template-columns: 1fr 1fr;\n    gap: 3.5mm;\n    margin: 3.5mm 0 4.5mm;\n    align-items: stretch;\n  }\n\n  /* Produção: mais espaço para os nomes dos produtos no gráfico da direita */\n  .production-grid {\n    grid-template-columns: 0.90fr 1.10fr;\n  }\n\n  .sales-grid {\n    grid-template-columns: 1.08fr 0.92fr;\n  }\n\n  .purchase-grid {\n    grid-template-columns: 1.06fr 0.94fr;\n  }\n\n  .chart-card {\n    border: 1px solid ${CORES.borda};\n    border-radius: 6px;\n    padding: 3.8mm;\n    background: #fff;\n    min-height: 80mm;\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  .chart-card.full {\n    grid-column: 1 / -1;\n    min-height: auto;\n  }\n\n  .chart-title {\n    color: ${CORES.verdeEscuro};\n    font-size: 9.4pt;\n    font-weight: 800;\n    margin-bottom: 2.6mm;\n  }\n\n  .chart-subtitle {\n    color: ${CORES.cinza};\n    font-size: 7.2pt;\n    margin-top: -1.5mm;\n    margin-bottom: 2.5mm;\n  }\n\n  /* PRODUÇÃO - Linha */\n  .line-chart {\n    width: 100%;\n    height: 52mm;\n    display: block;\n  }\n\n  .svg-grid {\n    stroke: #e4ebe6;\n    stroke-width: 1;\n  }\n\n  .svg-axis {\n    stroke: #9eaaa2;\n    stroke-width: 1;\n  }\n\n  .svg-line {\n    fill: none;\n    stroke: ${CORES.verde};\n    stroke-width: 3;\n    stroke-linecap: round;\n    stroke-linejoin: round;\n  }\n\n  .svg-area {\n    fill: #eaf4ed;\n    opacity: .75;\n  }\n\n  .svg-point {\n    fill: ${CORES.verde};\n    stroke: white;\n    stroke-width: 2;\n  }\n\n  .svg-label {\n    font-family: Arial, Tahoma, sans-serif;\n    font-size: 14px;\n    font-weight: 600;\n    fill: #536158;\n  }\n\n  /* Barras horizontais */\n  .bar-row {\n    display: grid;\n    grid-template-columns: 50mm 1fr 24mm;\n    gap: 2mm;\n    align-items: center;\n    margin: 2.5mm 0;\n    font-size: 7.4pt;\n  }\n\n  .bar-label {\n    white-space: normal;\n    overflow: visible;\n    text-overflow: clip;\n    line-height: 1.15;\n    max-height: 2.3em;\n  }\n\n  .bar-track {\n    height: 4mm;\n    background: #eef2ef;\n    border-radius: 2mm;\n    overflow: hidden;\n  }\n\n  .bar-fill {\n    height: 100%;\n    background: linear-gradient(90deg, ${CORES.verde}, #72aa75);\n    border-radius: 2mm;\n  }\n\n  .bar-value {\n    text-align: right;\n    white-space: nowrap;\n    font-weight: 800;\n    color: ${CORES.verdeEscuro};\n  }\n\n  /* VENDAS - Donut */\n  .donut-wrap {\n    display: grid;\n    grid-template-columns: 42mm 1fr;\n    gap: 4mm;\n    align-items: center;\n  }\n\n  .donut-shell {\n    width: 40mm;\n    height: 40mm;\n    position: relative;\n  }\n\n  .donut {\n    position: absolute;\n    inset: 0;\n    border-radius: 50%;\n  }\n\n  .donut-hole {\n    position: absolute;\n    inset: 9mm;\n    background: #fff;\n    border-radius: 50%;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    justify-content: center;\n    text-align: center;\n    color: ${CORES.verdeEscuro};\n    font-size: 6.2pt;\n    font-weight: 700;\n    line-height: 1.15;\n  }\n\n  .donut-hole strong {\n    display: block;\n    font-size: 7.7pt;\n    margin-top: .5mm;\n  }\n\n  .legend-item {\n    display: grid;\n    grid-template-columns: 3mm 1fr auto;\n    align-items: center;\n    gap: 1.7mm;\n    margin: 1.1mm 0;\n    font-size: 6.9pt;\n  }\n\n  .legend-dot {\n    width: 3mm;\n    height: 3mm;\n    border-radius: 1px;\n  }\n\n  /* Colunas verticais - Vendas/Compras */\n  .column-chart {\n    height: 58mm;\n    display: flex;\n    align-items: flex-end;\n    gap: 2.2mm;\n    padding: 4mm 1mm 0;\n    border-bottom: 1px solid #aab5ad;\n  }\n\n  .column-item {\n    flex: 1;\n    min-width: 0;\n    height: 100%;\n    display: flex;\n    flex-direction: column;\n    justify-content: flex-end;\n    align-items: stretch;\n  }\n\n  .column-value {\n    text-align: center;\n    color: ${CORES.verdeEscuro};\n    font-size: 7.2pt;\n    font-weight: 800;\n    margin-bottom: 1mm;\n    white-space: nowrap;\n  }\n\n  .column-bar-zone {\n    flex: 1;\n    display: flex;\n    align-items: flex-end;\n    justify-content: center;\n  }\n\n  .column-bar {\n    width: 72%;\n    min-height: 2mm;\n    background: ${CORES.verde};\n    border-radius: 2px 2px 0 0;\n  }\n\n  .column-label {\n    height: 8mm;\n    padding-top: 1.4mm;\n    text-align: center;\n    color: ${CORES.verdeEscuro};\n    font-size: 7.6pt;\n    line-height: 1.1;\n    font-weight: 800;\n  }\n\n  .column-legend {\n    display: grid;\n    grid-template-columns: 1fr 1fr;\n    gap: 1.8mm 4mm;\n    margin-top: 4mm;\n    padding-top: 3mm;\n    border-top: 1px solid #e1e7e2;\n  }\n\n  .column-key {\n    display: grid;\n    grid-template-columns: 7mm 1fr auto;\n    gap: 2mm;\n    align-items: start;\n    font-size: 7.2pt;\n    line-height: 1.2;\n  }\n\n  .key-index {\n    width: 6mm;\n    height: 6mm;\n    border: 1px solid ${CORES.verdeEscuro};\n    border-radius: 50%;\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    color: ${CORES.verdeEscuro};\n    font-weight: 800;\n    background: #fff;\n  }\n\n  .key-name {\n    color: ${CORES.texto};\n    font-weight: 700;\n    overflow-wrap: anywhere;\n  }\n\n  .key-value {\n    color: ${CORES.verdeEscuro};\n    font-weight: 800;\n    white-space: nowrap;\n  }\n\n  /* COMPRAS - concentração */\n  .share-stack {\n    width: 100%;\n    height: 9mm;\n    display: flex;\n    overflow: hidden;\n    border-radius: 5px;\n    border: 1px solid ${CORES.borda};\n    margin: 4mm 0 3mm;\n    background: #eef2ef;\n  }\n\n  .share-piece {\n    height: 100%;\n    min-width: 1px;\n    border-right: 1px solid rgba(255,255,255,.9);\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    color: #fff;\n    font-size: 6.8pt;\n    font-weight: 800;\n    text-shadow: 0 1px 1px rgba(0,0,0,.35);\n  }\n\n  .share-legend {\n    display: grid;\n    grid-template-columns: 1fr;\n    gap: 2mm;\n    margin-top: 3mm;\n  }\n\n  .share-item {\n    display: grid;\n    grid-template-columns: 7mm 1fr auto;\n    gap: 2mm;\n    align-items: start;\n    font-size: 7.2pt;\n    line-height: 1.2;\n  }\n\n  .share-index {\n    width: 6mm;\n    height: 6mm;\n    border: 1px solid ${CORES.verdeEscuro};\n    border-radius: 50%;\n    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    color: ${CORES.verdeEscuro};\n    font-weight: 800;\n    background: #fff;\n  }\n\n  .metric-strip {\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    gap: 2.5mm;\n    margin-top: 4mm;\n  }\n\n  .metric-mini {\n    padding: 2.6mm;\n    border-radius: 5px;\n    background: ${CORES.fundo};\n    border: 1px solid ${CORES.borda};\n    text-align: center;\n  }\n\n  .metric-mini .v {\n    font-size: 12pt;\n    color: ${CORES.verdeEscuro};\n    font-weight: 800;\n  }\n\n  .metric-mini .l {\n    margin-top: .7mm;\n    color: ${CORES.cinza};\n    font-size: 6.7pt;\n  }\n\n  .rank-grid {\n    display: grid;\n    grid-template-columns: 1fr 1fr;\n    gap: 4mm;\n    align-items: start;\n  }\n\n  .rank-box {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  table {\n    width: 100%;\n    border-collapse: collapse;\n    margin-bottom: 3mm;\n    page-break-inside: auto;\n    break-inside: auto;\n  }\n\n  thead {\n    display: table-header-group;\n  }\n\n  th {\n    text-align: left;\n    background: ${CORES.verde};\n    color: #fff;\n    padding: 1.8mm 1.7mm;\n    font-size: 7.1pt;\n    font-weight: 800;\n  }\n\n  td {\n    padding: 1.7mm;\n    border-bottom: 1px solid #e6ebe7;\n    vertical-align: top;\n    font-size: 7.2pt;\n  }\n\n  tr {\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  tbody tr:nth-child(even) {\n    background: #fafcfb;\n  }\n\n  .right { text-align: right; white-space: nowrap; }\n  .center { text-align: center; }\n  .muted { color: ${CORES.cinza}; }\n  .strong { font-weight: 800; }\n\n  .no-data {\n    border: 1px dashed ${CORES.borda};\n    background: ${CORES.fundo};\n    color: ${CORES.cinza};\n    padding: 5mm;\n    text-align: center;\n  }\n\n  .letterhead-footer {\n    position: relative;\n    clear: both;\n    width: 100%;\n    margin-top: 9mm;\n    padding-top: 2.5mm;\n    color: #416235;\n    text-align: center;\n    font-size: 7.4pt;\n    line-height: 1.25;\n    background: #fff;\n    break-inside: avoid;\n    page-break-inside: avoid;\n  }\n\n  .letterhead-footer .linha {\n    border-top: .55pt solid #607b52;\n    margin-bottom: 2.2mm;\n  }\n\n  .letterhead-footer .row + .row { margin-top: 1.1mm; }\n  .letterhead-footer .sep { padding: 0 2.2mm; font-weight: 700; }\n</style>\n</head>\n<body>\n  <main>\n    <section class=\"report-head\">\n      <div class=\"brand-row\">\n        <div class=\"brand-logo\" style=\"width:auto;max-height:none;font-weight:800;color:#214c37;\">ERP REPORT AUTOMATION HUB</div>\n        <div class=\"brand-copy\">\n          <div class=\"report-kicker\">ERP Report Automation Hub</div>\n          <h1>${esc(titulo)}</h1>\n          <div class=\"subtitle\">${subtitulo}</div>\n          <div class=\"status\">STATUS: ${esc(dados.status || 'OK')}</div>\n        </div>\n      </div>\n    </section>\n\n    ${blocoAlertas()}\n    ${conteudo}\n  </main>\n\n  <div class=\"letterhead-footer\">\n    <div class=\"linha\"></div>\n    <div class=\"row\">Public portfolio version <span class=\"sep\">▪</span> Synthetic examples only</div>\n    <div class=\"row\">Public workflow <span class=\"sep\">▪</span> No company contact information included</div>\n  </div>\n</body>\n</html>`;\n}\n\nconst CHART_COLORS = [\n  '#0b6b3a', '#6aa86d', '#d8df66', '#3f7c4e', '#9abf78', '#e6b94b', '#50745b', '#8fb39a'\n];\n\nfunction topComOutros(lista, valueKey, maxItens = 6) {\n  const arr = [...(lista || [])]\n    .filter(x => Number(x?.[valueKey] || 0) > 0)\n    .sort((a, b) => Number(b[valueKey] || 0) - Number(a[valueKey] || 0));\n\n  if (arr.length <= maxItens) return arr;\n\n  const top = arr.slice(0, maxItens - 1);\n  const resto = arr.slice(maxItens - 1).reduce((s, x) => s + Number(x[valueKey] || 0), 0);\n  top.push({ __outros: true, [valueKey]: resto, produto: 'Outros', fornecedor: 'Outros' });\n  return top;\n}\n\nfunction donutChart(lista, labelFn, valueKey, valueFormatter, centroLabel = 'Total') {\n  const arr = topComOutros(lista, valueKey, 7);\n  const total = arr.reduce((s, x) => s + Number(x[valueKey] || 0), 0);\n\n  if (!arr.length || total <= 0) {\n    return '<div class=\"no-data\">Sem dados suficientes para o gráfico.</div>';\n  }\n\n  let acumulado = 0;\n\n  const partes = arr.map((x, i) => {\n    const pct = (Number(x[valueKey] || 0) / total) * 100;\n    const inicio = acumulado;\n    acumulado += pct;\n    return `${CHART_COLORS[i % CHART_COLORS.length]} ${inicio.toFixed(4)}% ${acumulado.toFixed(4)}%`;\n  });\n\n  const legenda = arr.map((x, i) => {\n    const valor = Number(x[valueKey] || 0);\n    const pct = (valor / total) * 100;\n\n    return `\n      <div class=\"legend-item\">\n        <span class=\"legend-dot\" style=\"background:${CHART_COLORS[i % CHART_COLORS.length]}\"></span>\n        <span>${esc(labelFn(x))}</span>\n        <span class=\"right\">${esc(valueFormatter(valor))} • ${num(pct, 1)}%</span>\n      </div>`;\n  }).join('');\n\n  return `\n    <div class=\"donut-wrap\">\n      <div class=\"donut-shell\">\n        <div class=\"donut\" style=\"background:conic-gradient(${partes.join(',')})\"></div>\n        <div class=\"donut-hole\">${esc(centroLabel)}<strong>${num(total)}</strong></div>\n      </div>\n      <div>${legenda}</div>\n    </div>`;\n}\n\nfunction barChart(lista, labelFn, valueKey, valueFormatter, maxItens = 8) {\n  const arr = [...(lista || [])]\n    .filter(x => Number(x?.[valueKey] || 0) > 0)\n    .sort((a, b) => Number(b[valueKey] || 0) - Number(a[valueKey] || 0))\n    .slice(0, maxItens);\n\n  if (!arr.length) {\n    return '<div class=\"no-data\">Sem dados suficientes para o gráfico.</div>';\n  }\n\n  const max = Number(arr[0][valueKey] || 1);\n\n  return arr.map(x => {\n    const value = Number(x[valueKey] || 0);\n    const pct = Math.max(1.5, (value / max) * 100);\n\n    return `\n      <div class=\"bar-row\">\n        <div class=\"bar-label\">${esc(labelFn(x))}</div>\n        <div class=\"bar-track\">\n          <div class=\"bar-fill\" style=\"width:${pct.toFixed(2)}%\"></div>\n        </div>\n        <div class=\"bar-value\">${esc(valueFormatter(value))}</div>\n      </div>`;\n  }).join('');\n}\n\nfunction columnChart(lista, labelFn, valueKey, valueFormatter, maxItens = 6) {\n  const arr = [...(lista || [])]\n    .filter(x => Number(x?.[valueKey] || 0) > 0)\n    .sort((a, b) => Number(b[valueKey] || 0) - Number(a[valueKey] || 0))\n    .slice(0, maxItens);\n\n  if (!arr.length) {\n    return '<div class=\"no-data\">Sem dados suficientes para o gráfico.</div>';\n  }\n\n  const max = Number(arr[0][valueKey] || 1);\n\n  const barras = arr.map((x, i) => {\n    const value = Number(x[valueKey] || 0);\n    const pct = Math.max(4, (value / max) * 100);\n\n    return `\n      <div class=\"column-item\">\n        <div class=\"column-value\">${esc(valueFormatter(value))}</div>\n        <div class=\"column-bar-zone\">\n          <div class=\"column-bar\" style=\"height:${pct.toFixed(2)}%;background:${CHART_COLORS[i % CHART_COLORS.length]}\"></div>\n        </div>\n        <div class=\"column-label\">#${i + 1}</div>\n      </div>`;\n  }).join('');\n\n  const legenda = arr.map((x, i) => `\n    <div class=\"column-key\">\n      <span class=\"key-index\">${i + 1}</span>\n      <span class=\"key-name\">${esc(labelFn(x) || '-')}</span>\n      <span class=\"key-value\">${esc(valueFormatter(Number(x[valueKey] || 0)))}</span>\n    </div>`\n  ).join('');\n\n  return `\n    <div class=\"column-chart\">${barras}</div>\n    <div class=\"column-legend\">${legenda}</div>`;\n}\n\nfunction lineChart(lista, valueKey, valueFormatter) {\n  const arr = [...(lista || [])]\n    .filter(x => x?.data && Number(x?.[valueKey] || 0) >= 0)\n    .sort((a, b) => String(a.data).localeCompare(String(b.data)));\n\n  if (!arr.length) {\n    return '<div class=\"no-data\">Sem dados suficientes para o gráfico.</div>';\n  }\n\n  const W = 700;\n  const H = 230;\n  const left = 54;\n  const right = 16;\n  const top = 18;\n  const bottom = 42;\n  const chartW = W - left - right;\n  const chartH = H - top - bottom;\n\n  const valores = arr.map(x => Number(x[valueKey] || 0));\n  const max = Math.max(...valores, 1);\n\n  const pts = arr.map((x, i) => {\n    const px = arr.length === 1\n      ? left + chartW / 2\n      : left + (i * chartW / (arr.length - 1));\n\n    const py = top + chartH - ((Number(x[valueKey] || 0) / max) * chartH);\n\n    return { x: px, y: py, item: x };\n  });\n\n  const linha = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');\n  const area = `${left},${top + chartH} ${linha} ${left + chartW},${top + chartH}`;\n\n  const labelIdx = new Set([\n    0,\n    Math.floor((arr.length - 1) * .25),\n    Math.floor((arr.length - 1) * .5),\n    Math.floor((arr.length - 1) * .75),\n    arr.length - 1,\n  ]);\n\n  const labelsX = pts.map((p, i) => {\n    if (!labelIdx.has(i)) return '';\n    return `<text class=\"svg-label\" x=\"${p.x}\" y=\"${H - 12}\" text-anchor=\"middle\">${esc(dataBR(p.item.data).slice(0, 5))}</text>`;\n  }).join('');\n\n  const circles = pts.map(p =>\n    `<circle class=\"svg-point\" cx=\"${p.x}\" cy=\"${p.y}\" r=\"4\"><title>${esc(dataBR(p.item.data))}: ${esc(valueFormatter(Number(p.item[valueKey] || 0)))}</title></circle>`\n  ).join('');\n\n  return `\n    <svg class=\"line-chart\" viewBox=\"0 0 ${W} ${H}\" role=\"img\">\n      <line class=\"svg-grid\" x1=\"${left}\" y1=\"${top}\" x2=\"${left + chartW}\" y2=\"${top}\" />\n      <line class=\"svg-grid\" x1=\"${left}\" y1=\"${top + chartH / 2}\" x2=\"${left + chartW}\" y2=\"${top + chartH / 2}\" />\n      <line class=\"svg-axis\" x1=\"${left}\" y1=\"${top + chartH}\" x2=\"${left + chartW}\" y2=\"${top + chartH}\" />\n\n      <text class=\"svg-label\" x=\"${left - 8}\" y=\"${top + 4}\" text-anchor=\"end\">${esc(valueFormatter(max))}</text>\n      <text class=\"svg-label\" x=\"${left - 8}\" y=\"${top + chartH / 2 + 4}\" text-anchor=\"end\">${esc(valueFormatter(max / 2))}</text>\n      <text class=\"svg-label\" x=\"${left - 8}\" y=\"${top + chartH + 4}\" text-anchor=\"end\">0</text>\n\n      <polygon class=\"svg-area\" points=\"${area}\" />\n      <polyline class=\"svg-line\" points=\"${linha}\" />\n      ${circles}\n      ${labelsX}\n    </svg>`;\n}\n\nfunction concentrationChart(lista, labelFn, valueKey) {\n  const arr = [...(lista || [])]\n    .filter(x => Number(x?.[valueKey] || 0) > 0)\n    .sort((a, b) => Number(b[valueKey] || 0) - Number(a[valueKey] || 0));\n\n  const total = arr.reduce((s, x) => s + Number(x[valueKey] || 0), 0);\n\n  if (!arr.length || total <= 0) {\n    return '<div class=\"no-data\">Sem dados suficientes para o gráfico.</div>';\n  }\n\n  const top = arr.slice(0, 4);\n  const outros = arr.slice(4).reduce((s, x) => s + Number(x[valueKey] || 0), 0);\n\n  const itens = top.map(x => ({\n    label: labelFn(x),\n    valor: Number(x[valueKey] || 0),\n  }));\n\n  if (outros > 0) {\n    itens.push({ label: 'Outros fornecedores', valor: outros });\n  }\n\n  const stacked = itens.map((x, i) => {\n    const pct = (x.valor / total) * 100;\n    const numero = pct >= 7 ? `${i + 1}` : '';\n    return `<div class=\"share-piece\" style=\"width:${pct.toFixed(3)}%;background:${CHART_COLORS[i % CHART_COLORS.length]}\">${numero}</div>`;\n  }).join('');\n\n  const legend = itens.map((x, i) => {\n    const pct = (x.valor / total) * 100;\n    return `\n      <div class=\"share-item\">\n        <span class=\"share-index\">${i + 1}</span>\n        <span class=\"key-name\">${esc(x.label)}</span>\n        <span class=\"right strong\">${num(pct, 1)}% • ${moeda(x.valor)}</span>\n      </div>`;\n  }).join('');\n\n  const top1 = arr[0] ? (Number(arr[0][valueKey]) / total) * 100 : 0;\n  const top3 = (arr.slice(0, 3).reduce((s, x) => s + Number(x[valueKey] || 0), 0) / total) * 100;\n  const top5 = (arr.slice(0, 5).reduce((s, x) => s + Number(x[valueKey] || 0), 0) / total) * 100;\n\n  return `\n    <div class=\"share-stack\">${stacked}</div>\n    <div class=\"share-legend\">${legend}</div>\n\n    <div class=\"metric-strip\">\n      <div class=\"metric-mini\"><div class=\"v\">${num(top1, 1)}%</div><div class=\"l\">Maior fornecedor</div></div>\n      <div class=\"metric-mini\"><div class=\"v\">${num(top3, 1)}%</div><div class=\"l\">Concentração Top 3</div></div>\n      <div class=\"metric-mini\"><div class=\"v\">${num(top5, 1)}%</div><div class=\"l\">Concentração Top 5</div></div>\n    </div>`;\n}\n\nfunction rankingTable(lista, labelFn, valueKey, valueFormatter, maxItens = 5) {\n  const arr = [...(lista || [])]\n    .filter(x => Number(x?.[valueKey] || 0) > 0)\n    .sort((a, b) => Number(b[valueKey] || 0) - Number(a[valueKey] || 0))\n    .slice(0, maxItens);\n\n  if (!arr.length) return '<div class=\"no-data\">Sem dados.</div>';\n\n  return `\n    <table>\n      <thead>\n        <tr>\n          <th style=\"width:8mm\">#</th>\n          <th>Descrição</th>\n          <th class=\"right\">Resultado</th>\n        </tr>\n      </thead>\n      <tbody>\n        ${arr.map((x, i) => `\n          <tr>\n            <td>${i + 1}</td>\n            <td>${esc(labelFn(x))}</td>\n            <td class=\"right strong\">${esc(valueFormatter(Number(x[valueKey] || 0)))}</td>\n          </tr>`).join('')}\n      </tbody>\n    </table>`;\n}\n\nlet conteudo = '';\nlet nomeArquivoPdf = '';\n\n// =====================================================\n// 1) PRODUÇÃO\n// Gráficos: evolução diária + ranking horizontal\n// =====================================================\nif (modulo === 'PRODUCAO') {\n  const r = dados.resumo || {};\n  const ranking = dados.rankingProdutos || dados.produtos || [];\n  const dias = dados.producaoPorDia || [];\n  const mais = r.maisProduzido || ranking[0] || {};\n  const menos = r.menosProduzido || (ranking.length ? ranking[ranking.length - 1] : {});\n\n  conteudo += `\n    <div class=\"cards cinco\">\n      ${card('Unidades produzidas', num(r.totalUnidades), 'Total no período')}\n      ${card('Ordens', num(r.totalOrdens), 'Ordens de produção')}\n      ${card('Produtos', num(r.totalProdutos), 'Produtos industrializados')}\n      ${card('Dias ativos', num(r.totalDiasProducao), 'Dias com produção')}\n      ${card('Média / ordem', num(r.mediaPorOrdem), 'Unidades por OP')}\n    </div>\n\n    <div class=\"destaques\">\n      ${destaque('Mais produzido', mais.produto, mais.totalUnidades != null ? `${num(mais.totalUnidades)} unidades` : '')}\n      ${destaque('Menos produzido', menos.produto, menos.totalUnidades != null ? `${num(menos.totalUnidades)} unidades` : '')}\n    </div>\n\n    <div class=\"chart-grid production-grid\">\n      <div class=\"chart-card\">\n        <div class=\"chart-title\">Evolução da produção por dia</div>\n        <div class=\"chart-subtitle\">Quantidade total produzida em cada dia com movimentação.</div>\n        ${lineChart(dias, 'totalUnidades', v => num(v))}\n      </div>\n\n      <div class=\"chart-card\">\n        <div class=\"chart-title\">Produtos com maior volume produzido</div>\n        <div class=\"chart-subtitle\">Comparativo das maiores quantidades do período.</div>\n        ${barChart(ranking, x => x.produto || '-', 'totalUnidades', v => num(v), 7)}\n      </div>\n    </div>\n\n    <h2>Top produtos do período</h2>\n    ${rankingTable(ranking, x => x.produto || '-', 'totalUnidades', v => `${num(v)} unidades`, 7)}\n  `;\n\n  nomeArquivoPdf = `Relatorio_Executivo_Producao_${slug(form.MES || '')}_${slug(form.ANO || '')}.pdf`;\n}\n\n// =====================================================\n// 2) VENDAS\n// Gráficos: donut de faturamento + colunas por unidades\n// =====================================================\nelse if (modulo === 'VENDAS') {\n  const r = dados.resumo || {};\n  const porUnidades = dados.rankingUnidades || dados.produtos || [];\n  const porValor = dados.rankingValor || dados.produtos || [];\n  const maisUn = r.maisVendidoUnidades || porUnidades[0] || {};\n  const maisValor = r.maiorFaturamento || porValor[0] || {};\n\n  conteudo += `\n    <div class=\"cards cinco\">\n      ${card('Valor vendido', moeda(r.totalValor), 'Total do período')}\n      ${card('Unidades', num(r.totalUnidades), 'Unidades vendidas')}\n      ${card('Pedidos', num(r.totalPedidos), 'Documentos identificados')}\n      ${card('Clientes', num(r.totalClientes), 'Clientes distintos')}\n      ${card('Ticket médio', moeda(r.ticketMedio), 'Valor por pedido')}\n    </div>\n\n    <div class=\"destaques\">\n      ${destaque('Maior volume em unidades', maisUn.produto, maisUn.totalUnidades != null ? `${num(maisUn.totalUnidades)} unidades` : '')}\n      ${destaque('Maior valor vendido', maisValor.produto, maisValor.totalValor != null ? moeda(maisValor.totalValor) : '')}\n    </div>\n\n    <div class=\"chart-grid sales-grid\">\n      <div class=\"chart-card\">\n        <div class=\"chart-title\">Produtos com maior faturamento</div>\n        <div class=\"chart-subtitle\">Ranking por valor vendido — legível também em impressão preto e branco.</div>\n        ${barChart(porValor, x => x.produto || '-', 'totalValor', v => moeda(v), 7)}\n      </div>\n\n      <div class=\"chart-card\">\n        <div class=\"chart-title\">Top produtos em unidades</div>\n        <div class=\"chart-subtitle\">Comparação visual do volume vendido.</div>\n        ${columnChart(porUnidades, x => x.produto || '-', 'totalUnidades', v => num(v), 6)}\n      </div>\n    </div>\n\n    <div class=\"rank-grid\">\n      <div class=\"rank-box\">\n        <h2>Top 5 por unidades</h2>\n        ${rankingTable(porUnidades, x => x.produto || '-', 'totalUnidades', v => `${num(v)} un.`, 5)}\n      </div>\n\n      <div class=\"rank-box\">\n        <h2>Top 5 por valor</h2>\n        ${rankingTable(porValor, x => x.produto || '-', 'totalValor', v => moeda(v), 5)}\n      </div>\n    </div>\n  `;\n\n  nomeArquivoPdf = `Relatorio_Executivo_Vendas_${slug(form.MES || '')}_${slug(form.ANO || '')}.pdf`;\n}\n\n// =====================================================\n// 3) COMPRAS\n// Gráficos: colunas de gasto + concentração de fornecedores\n// =====================================================\nelse if (modulo === 'COMPRAS') {\n  const r = dados.resumo || {};\n  const ranking = dados.rankingFornecedores || dados.fornecedores || [];\n  const maior = r.maiorFornecedor || ranking[0] || {};\n  const menor = r.menorFornecedor || (ranking.length ? ranking[ranking.length - 1] : {});\n  const media = r.totalLancamentos ? Number(r.totalGasto || 0) / Number(r.totalLancamentos) : 0;\n\n  conteudo += `\n    <div class=\"cards\">\n      ${card('Total gasto', moeda(r.totalGasto), 'Compras e despesas')}\n      ${card('Lançamentos', num(r.totalLancamentos), 'Registros processados')}\n      ${card('Fornecedores', num(r.totalFornecedores), 'Fornecedores distintos')}\n      ${card('Média / lançamento', moeda(media), 'Valor médio')}\n    </div>\n\n    <div class=\"destaques\">\n      ${destaque('Maior gasto por fornecedor', maior.fornecedor, maior.valorTotal != null ? moeda(maior.valorTotal) : '')}\n      ${destaque('Menor gasto por fornecedor', menor.fornecedor, menor.valorTotal != null ? moeda(menor.valorTotal) : '')}\n    </div>\n\n    <div class=\"chart-grid purchase-grid\">\n      <div class=\"chart-card\">\n        <div class=\"chart-title\">Maiores gastos por fornecedor</div>\n        <div class=\"chart-subtitle\">Top fornecedores classificados pelo valor acumulado.</div>\n        ${columnChart(ranking, x => x.fornecedor || '-', 'valorTotal', v => moeda(v), 6)}\n      </div>\n\n      <div class=\"chart-card\">\n        <div class=\"chart-title\">Concentração dos gastos</div>\n        <div class=\"chart-subtitle\">Quanto os maiores fornecedores representam do gasto total.</div>\n        ${concentrationChart(ranking, x => x.fornecedor || '-', 'valorTotal')}\n      </div>\n    </div>\n\n    <h2>Top fornecedores do período</h2>\n    ${rankingTable(ranking, x => x.fornecedor || '-', 'valorTotal', v => moeda(v), 7)}\n  `;\n\n  nomeArquivoPdf = `Relatorio_Executivo_Compras_${slug(form.MES || '')}_${slug(form.ANO || '')}.pdf`;\n}\n\nelse {\n  throw new Error(`Módulo não suportado pelo gerador EXECUTIVO: ${modulo}`);\n}\n\nconst titulo = `Relatório Executivo de ${textoModulo()}`;\nconst subtitulo = periodoRelatorio();\nconst html = documentoHtml(titulo, subtitulo, conteudo);\n\nreturn [{\n  json: {\n    ...dados,\n    tipoRelatorioGerado: 'EXECUTIVO',\n    nomeArquivoPdf,\n    html,\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        144
+      ],
+      "id": "506fbbc1-5ac0-4765-a34e-09ace0a40c10",
+      "name": "GERAR RELATÓRIO EXECUTIVO"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst html = item.json.html;\n\nif (!html) {\n  throw new Error('Não encontrei o HTML do relatório bruto.');\n}\n\nconst buffer = Buffer.from('\\uFEFF' + html, 'utf8');\n\nreturn [{\n  json: item.json,\n\n  binary: {\n    data: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/html',\n      fileName: 'index.html',\n      fileExtension: 'html'\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        -336
+      ],
+      "id": "e632c978-1b95-4e11-9351-d4db6f771bfe",
+      "name": "GERAR INDEX.HTML - BRUTO"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "returnBinary",
+        "completionTitle": "Relatório gerado com sucesso",
+        "completionMessage": "O relatório foi processado com sucesso. O download do arquivo será iniciado automaticamente.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        3520,
+        -160
+      ],
+      "id": "5e4d1805-5361-4979-96af-3fcec476dabb",
+      "name": "Baixar PDF - BRUTO"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://gotenberg:3000/forms/chromium/convert/html",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "files",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2480,
+        -496
+      ],
+      "id": "5ea36db6-a9ce-4098-9c62-e6fce415adca",
+      "name": "Gerar PDF - Bruto - c/ Gotenberg"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://gotenberg:3000/forms/chromium/convert/html",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "files",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2480,
+        464
+      ],
+      "id": "d44d6550-cfc1-4792-ac39-07d38dc754b1",
+      "name": "Gerar PDF - Executivo -  c/ Gotenberg"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst html = item.json.html;\n\nif (!html) {\n  throw new Error('Não encontrei o HTML do relatório executivo.');\n}\n\nconst buffer = Buffer.from('\\uFEFF' + html, 'utf8');\n\nreturn [{\n  json: item.json,\n\n  binary: {\n    data: {\n      data: buffer.toString('base64'),\n      mimeType: 'text/html',\n      fileName: 'index.html',\n      fileExtension: 'html'\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        272
+      ],
+      "id": "e77e5821-58ae-417c-9a47-75000c0bbda3",
+      "name": "GERAR INDEX.HTML - EXECUTIVO"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "returnBinary",
+        "completionTitle": "Relatório gerado com sucesso",
+        "completionMessage": "O relatório foi processado com sucesso. O download do arquivo será iniciado automaticamente.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [
+        2976,
+        176
+      ],
+      "id": "117c4b06-1790-4b71-af44-cfbdf18df58a",
+      "name": "Baixar PDF - EXECUTIVO"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst nome =\n  item.json.nomeArquivoPdf ||\n  'Relatorio_Bruto.pdf';\n\nif (!item.binary?.data) {\n  throw new Error('PDF não encontrado na saída do Gotenberg.');\n}\n\n// Renomeia o arquivo\nitem.binary.data.fileName = nome;\nitem.binary.data.mimeType = 'application/pdf';\nitem.binary.data.fileExtension = 'pdf';\n\n// Move de binary.data para binary.pdf\nitem.binary.pdf = item.binary.data;\n\n// Remove o campo antigo\ndelete item.binary.data;\n\nreturn [item];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2672,
+        -320
+      ],
+      "id": "058e18a7-bbdc-4e52-88b1-8d491dafdbf4",
+      "name": "Renomear PDF - Bruto"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nconst nome =\n  item.json.nomeArquivoPdf ||\n  'Relatorio_Executivo.pdf';\n\nif (!item.binary?.data) {\n  throw new Error('PDF não encontrado na saída do Gotenberg.');\n}\n\nitem.binary.data.fileName = nome;\nitem.binary.data.mimeType = 'application/pdf';\nitem.binary.data.fileExtension = 'pdf';\n\nreturn [item];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2688,
+        272
+      ],
+      "id": "2a5ae9f5-26c9-4cdf-957f-97eb956cd78f",
+      "name": "Renomear PDF - Executivo"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst linhas = item.json.linhasExcel || [];\n\nif (!Array.isArray(linhas) || linhas.length === 0) {\n  throw new Error('Não existem linhas preparadas para gerar o Excel do relatório bruto.');\n}\n\nreturn linhas.map(linha => ({\n  json: linha\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        -80
+      ],
+      "id": "1b4153ee-1d28-4990-b64a-d425405c9a7c",
+      "name": "GERAR EXCEL - BRUTO"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "binaryPropertyName": "excel",
+        "options": {
+          "fileName": "={{ $('GERAR RELATÓRIO BRUTO').first().json.nomeArquivoExcel }}",
+          "headerRow": true,
+          "sheetName": "Relatorio Bruto"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2624,
+        -80
+      ],
+      "id": "db721d48-6aa4-4920-9edd-21376cea7fcc",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2992,
+        -160
+      ],
+      "id": "71602ab9-be61-42f6-9690-12e75c229a3c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "compress",
+        "binaryPropertyName": "pdf,excel",
+        "fileName": "={{ $('GERAR RELATÓRIO BRUTO').first().json.nomeArquivoZip }}"
+      },
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        3216,
+        -160
+      ],
+      "id": "f97d7088-35c5-4227-a8e6-dde108a66193",
+      "name": "Compression"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Envio de Relatório ERP": {
+      "main": [
+        [
+          {
+            "node": "Extração de Dados Brutos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extração de Dados Brutos": {
+      "main": [
+        [
+          {
+            "node": "Switch - Decisão de Relatórios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch - Decisão de Relatórios": {
+      "main": [
+        [
+          {
+            "node": "PARSER - PRODUÇÃO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PARSER - COMPRAS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PARSER - VENDAS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PARSER - COMPRAS": {
+      "main": [
+        [
+          {
+            "node": "Switch - Validação do PARSER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PARSER - PRODUÇÃO": {
+      "main": [
+        [
+          {
+            "node": "Switch - Validação do PARSER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PARSER - VENDAS": {
+      "main": [
+        [
+          {
+            "node": "Switch - Validação do PARSER",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch - Validação do PARSER": {
+      "main": [
+        [
+          {
+            "node": "Switch - TIPO DE SAÍDA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch - TIPO DE SAÍDA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar LOG DE ERRO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar LOG DE ERRO": {
+      "main": [
+        [
+          {
+            "node": "LOG_ERRO_MODULO.txt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LOG_ERRO_MODULO.txt": {
+      "main": [
+        [
+          {
+            "node": "Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Form": {
+      "main": [
+        []
+      ]
+    },
+    "Switch - TIPO DE SAÍDA": {
+      "main": [
+        [
+          {
+            "node": "GERAR RELATÓRIO BRUTO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GERAR RELATÓRIO BRUTO",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GERAR RELATÓRIO EXECUTIVO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GERAR RELATÓRIO EXECUTIVO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GERAR RELATÓRIO BRUTO": {
+      "main": [
+        [
+          {
+            "node": "GERAR INDEX.HTML - BRUTO",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GERAR EXCEL - BRUTO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GERAR RELATÓRIO EXECUTIVO": {
+      "main": [
+        [
+          {
+            "node": "GERAR INDEX.HTML - EXECUTIVO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GERAR INDEX.HTML - BRUTO": {
+      "main": [
+        [
+          {
+            "node": "Gerar PDF - Bruto - c/ Gotenberg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar PDF - Bruto - c/ Gotenberg": {
+      "main": [
+        [
+          {
+            "node": "Renomear PDF - Bruto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GERAR INDEX.HTML - EXECUTIVO": {
+      "main": [
+        [
+          {
+            "node": "Gerar PDF - Executivo -  c/ Gotenberg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar PDF - Executivo -  c/ Gotenberg": {
+      "main": [
+        [
+          {
+            "node": "Renomear PDF - Executivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Renomear PDF - Bruto": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Renomear PDF - Executivo": {
+      "main": [
+        [
+          {
+            "node": "Baixar PDF - EXECUTIVO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GERAR EXCEL - BRUTO": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Compression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compression": {
+      "main": [
+        [
+          {
+            "node": "Baixar PDF - BRUTO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
